@@ -1,0 +1,23 @@
+#VRML_OBJ R2019a utf8
+DEF COIN Transform {
+  translation -1.5 0 -1.5
+  rotation 0 1 0 11.08318530717957
+  children [
+    Transform {
+      rotation 1 0 0 1.5707962836408271
+      children [
+        DEF Coin Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0.8730601968413825 0.8625162127107653 0
+            }
+          }
+          geometry Cylinder {
+            height 0.01
+            radius 0.12
+          }
+        }
+      ]
+    }
+  ]
+}
