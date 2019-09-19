@@ -59,9 +59,13 @@ def maskFrame(frame):
     # Any hue
     # High saturation
     # High value
-    return cv2.inRange(hsv,
+    #Greenish yellow (25,100,20) ~ (35, 255, 255)
+    yellow_mask = cv2.inRange(hsv, (25,100,20), (35,255,255))
+    return yellow_mask
+    
+'''return cv2.inRange(hsv,
                        np.array([0,180,180]),
-                       np.array([255,255,255]))
+                       np.array([255,255,255]))'''
 
 def main():
     print("Connecting to camera")
@@ -106,14 +110,14 @@ def main():
                 bytes = client_video.recv(BUFFER_SIZE)
                 img += bytes
             img = img[:img_full_length] # Truncate in case there's too much data.
-
+            
             print("received mockup img.")
             print(len(img))
             img = np.frombuffer(img, dtype=np.uint8).reshape(750,750,3)
             print(len(img))
 
             img = cv2.bitwise_and(img,img, mask= maskFrame(img))
-
+            cv2.imwrite('masked.png', img)
             balls = detect_balls(fast, img)
 
             print(balls)
