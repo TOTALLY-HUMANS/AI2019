@@ -1,4 +1,4 @@
-#VRML_SIM R2019a utf8
+#VRML_SIM R2019b utf8
 DEF _world WorldInfo {
 }
 DEF _camera Viewpoint {
@@ -11,8 +11,8 @@ DEF _fog Fog {
   visibilityRange 30
 }
 DEF _goalie Robot {
-  translation 0.75 0 1.5
-  rotation 0 -1 0 -2.3561953071795863
+  translation 0.43157425078246126 -0.06717919632797394 1.7819334068440293
+  rotation -0.0036729532043248635 -0.9999506963636273 -0.009225738813526542 -0.7747699500788245
   children [
     ArucoMarker {
     }
@@ -141,7 +141,7 @@ DEF _goalie Robot {
               DEF WHEEL_BO Cylinder {
                 height 0.075
                 radius 0.04
-                subdivision 14
+                subdivision 16
               }
             ]
           }
@@ -230,10 +230,12 @@ DEF _goalie Robot {
   controllerArgs "0"
   supervisor TRUE
   synchronization FALSE
+  linearVelocity -9.696724008784397e-07 -9.564634397844566e-12 -7.840139260753312e-08
+  angularVelocity 1.8023470285503995e-10 3.185641557463469e-06 2.6323339988375804e-10
 }
 DEF my_robot Robot {
-  translation -0.75 0 -1.5
-  rotation 0 -0.9999999999999999 0 0.7853930000000001
+  translation -0.7500058286478146 -0.06718459782871805 -1.4999991875616128
+  rotation 6.3924148995856364e-09 -1 1.102420538118494e-09 -2.261572143753301
   children [
     ArucoMarker {
       url [
@@ -365,7 +367,7 @@ DEF my_robot Robot {
               DEF WHEEL_BO Cylinder {
                 height 0.075
                 radius 0.04
-                subdivision 14
+                subdivision 16
               }
             ]
           }
@@ -454,10 +456,12 @@ DEF my_robot Robot {
   controllerArgs "0"
   supervisor TRUE
   synchronization FALSE
+  linearVelocity 2.1961965468999363e-06 -7.167703541002887e-17 -4.3086957721652615e-06
+  angularVelocity 8.9344911158267e-18 -6.4040429535564645 4.597323838067689e-16
 }
 DEF _goalie Robot {
-  translation 1.5 -0.07004544 0.75
-  rotation 0 -1 0 -2.3561953071795863
+  translation 0.6709454852034047 -0.06717909282392338 1.5427496239558116
+  rotation -0.0037508299757930503 -0.9999917968005243 0.0015289232000388923 2.366974120305638
   children [
     ArucoMarker {
     }
@@ -586,7 +590,7 @@ DEF _goalie Robot {
               DEF WHEEL_BO Cylinder {
                 height 0.075
                 radius 0.04
-                subdivision 14
+                subdivision 16
               }
             ]
           }
@@ -675,10 +679,12 @@ DEF _goalie Robot {
   controllerArgs "0"
   supervisor TRUE
   synchronization FALSE
+  linearVelocity -4.694394725670763e-07 -4.274494356321288e-12 4.4854262946719614e-07
+  angularVelocity 3.6574359125809393e-10 3.184903527755121e-06 -2.612884417014739e-10
 }
 DEF my_robot Robot {
-  translation -1.5 0 -0.75
-  rotation 0 -0.9999999999999999 0 0.7853930000000001
+  translation -1.500005828647811 -0.06718459782871805 -0.7499991875616216
+  rotation 6.3924149209149145e-09 -1 1.1024207013759482e-09 -2.261572092284739
   children [
     ArucoMarker {
       url [
@@ -810,7 +816,7 @@ DEF my_robot Robot {
               DEF WHEEL_BO Cylinder {
                 height 0.075
                 radius 0.04
-                subdivision 14
+                subdivision 16
               }
             ]
           }
@@ -899,6 +905,8 @@ DEF my_robot Robot {
   controllerArgs "0"
   supervisor TRUE
   synchronization FALSE
+  linearVelocity 2.196196762192265e-06 -5.511298192283869e-17 -4.3086956502265365e-06
+  angularVelocity -4.6143091917114485e-16 -6.404042953556103 -5.93511545143972e-16
 }
 DEF _global_light DirectionalLight {
   ambientIntensity 1
@@ -975,8 +983,8 @@ DEF top_cam Robot {
 DEF _goals Group {
   children [
     DEF Ask_the RubberDuck {
-      translation -1.019300867420142 0.21995456000000002 -2.044223627027913
-      rotation 0 -1 0 0.2617994061795879
+      translation -0.9602592601645549 -0.0825661832474281 -2.100619296575705
+      rotation 0.7681594880586503 -0.6199547673843439 0.15995964273183538 -2.884475693251386
       name "null"
       immersionProperties [
         ImmersionProperties {
@@ -1382,7 +1390,7 @@ DEF _balls Group {
     DEF _yellow_balls Group {
       children [
         DEF _yellow_ball Solid {
-          translation -1 -0.0842535192485316 1
+          translation -1 -0.0840362728122209 1
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1406,10 +1414,11 @@ DEF _balls Group {
               angular 0.1
             }
           }
-          linearVelocity 0 0.0016928284407388451 0
+          rotationStep 0.261799
+          linearVelocity 0 1.3407945394757387e-06 0
         }
         DEF _yellow_ball Solid {
-          translation -1 -0.0842535192485316 0
+          translation -1 -0.0840362728122209 0
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1433,10 +1442,10 @@ DEF _balls Group {
               angular 0.1
             }
           }
-          linearVelocity 0 0.0016928284407388451 0
+          linearVelocity 0 1.3407945394757387e-06 0
         }
         DEF _yellow_ball Solid {
-          translation 0 -0.0842535192485316 -1
+          translation 0 -0.0840362728122209 -1
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1460,10 +1469,10 @@ DEF _balls Group {
               angular 0.1
             }
           }
-          linearVelocity 0 0.0016928284407388451 0
+          linearVelocity 0 1.3407945394757387e-06 0
         }
         DEF _yellow_ball Solid {
-          translation 1 -0.0842535192485316 0
+          translation 1 -0.0840362728122209 0
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1487,10 +1496,10 @@ DEF _balls Group {
               angular 0.1
             }
           }
-          linearVelocity 0 0.0016928284407388451 0
+          linearVelocity 0 1.3407945394757387e-06 0
         }
         DEF _yellow_ball Solid {
-          translation 0 -0.0842535192485316 1
+          translation 0 -0.0840363 1
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1514,10 +1523,9 @@ DEF _balls Group {
               angular 0.1
             }
           }
-          linearVelocity 0 0.0016928284407388451 0
         }
         DEF _yellow_ball Solid {
-          translation 0 -0.034449819107115205 0
+          translation 0 -0.03403651005518101 0
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1541,9 +1549,10 @@ DEF _balls Group {
               angular 0.1
             }
           }
+          linearVelocity 0 3.190047246356204e-06 0
         }
         DEF _yellow_ball Solid {
-          translation 1 -0.0842535192485316 -1
+          translation 1 -0.0840362728122209 -1
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
@@ -1567,21 +1576,21 @@ DEF _balls Group {
               angular 0.1
             }
           }
-          linearVelocity 0 0.0016928284407388451 0
+          linearVelocity 0 1.3407945394757387e-06 0
         }
       ]
     }
     DEF _green_balls Group {
       children [
         DEF _green_ball Solid {
-          translation 1.4 -0.08439962315863915 0
+          translation 1.4 -0.0840364 0
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
-                baseColor 0 0.9 0
+                baseColor 1 0 0.49803899999999995
                 roughness 1
                 metalness 0.5
-                emissiveColor 0 0.7 0
+                emissiveColor 1 0 0.49803899999999995
               }
               geometry Sphere {
                 radius 0.036
@@ -1599,14 +1608,14 @@ DEF _balls Group {
           }
         }
         DEF _green_ball Solid {
-          translation -1.4 -0.08439962315863915 0
+          translation -1.4 -0.0840364 0
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
-                baseColor 0 0.9 0
+                baseColor 1 0 0.49803899999999995
                 roughness 1
                 metalness 0.5
-                emissiveColor 0 0.7 0
+                emissiveColor 1 0 0.49803899999999995
               }
               geometry Sphere {
                 radius 0.036
@@ -1625,14 +1634,14 @@ DEF _balls Group {
           }
         }
         DEF _green_ball Solid {
-          translation 0 -0.08439962315863915 -1.4
+          translation 0 -0.08403638846782319 -1.4
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
-                baseColor 0 0.9 0
+                baseColor 1 0 0.49803899999999995
                 roughness 1
                 metalness 0.5
-                emissiveColor 0 0.7 0
+                emissiveColor 1 0 0.49803899999999995
               }
               geometry Sphere {
                 radius 0.036
@@ -1649,16 +1658,17 @@ DEF _balls Group {
               angular 0.1
             }
           }
+          linearVelocity 0 2.242302578844145e-06 0
         }
         DEF _green_ball Solid {
-          translation 0 -0.08439962315863915 1.4
+          translation 0 -0.08403638846782319 1.4
           children [
             DEF _energy_ball Shape {
               appearance PBRAppearance {
-                baseColor 0 0.9 0
+                baseColor 1 0 0.49803899999999995
                 roughness 1
                 metalness 0.5
-                emissiveColor 0 0.7 0
+                emissiveColor 1 0 0.49803899999999995
               }
               geometry Sphere {
                 radius 0.036
@@ -1675,6 +1685,7 @@ DEF _balls Group {
               angular 0.1
             }
           }
+          linearVelocity 0 2.242302578844145e-06 0
         }
       ]
     }
