@@ -131,7 +131,7 @@ def simple_follow_waypoints(wp_x, wp_y):
         curr_y = wp_y[wp_idx]
         d = math.sqrt((curr_x - pose[0])**2 + (curr_y - pose[1])**2)
         goal_theta = math.atan2(curr_y-pose[1], curr_x-pose[0])
-        theta_error =   normalize_angle((pose[2] -90.0)*DEG2RAD  -goal_theta  )
+        theta_error =   normalize_angle((pose[2] -90.0)*DEG2RAD  - goal_theta  )
     
         if d < 0.20:
             wp_idx = wp_idx + 1
