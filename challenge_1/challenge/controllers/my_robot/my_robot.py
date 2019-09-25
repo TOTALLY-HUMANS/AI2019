@@ -16,10 +16,10 @@ while bot.step():
     # get current time
     time = bot.get_time()
 
-    if time < 100.00:
+    if time < 1.00:
         bot.set_motors(1, 1)
     else:
-        bot.set_motors(0, 0)
+        bot.set_motors(-1, 1)
 
     print bot.get_position()
     print bot.get_balls()

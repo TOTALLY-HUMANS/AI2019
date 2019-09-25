@@ -40,3 +40,5 @@ while bot.step():
 
     if (abs(dx) + abs(dz) <=0.2): # switch to the next target if close enough
         idx += 1
+        
+    
