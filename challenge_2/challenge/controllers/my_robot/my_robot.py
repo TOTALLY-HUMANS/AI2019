@@ -26,14 +26,17 @@ DEG2RAD = math.pi/180.0
 RAD2DEG = 180.0/math.pi
 
         
-
+#limits controls between -1 and 1 and maintains the ratio between
+#controls of each wheel
 def limit_controls(x_control, y_control):
 
     while abs(x_control) > 1.0 or abs(y_control) > 1.0:
         y_control = y_control/2.0
         x_control = x_control/2.0
     return x_control, y_control
-    
+ 
+#computes and applies the control commands for each wheel based on
+#requested velocity and angular velocity
 def controls(vel, omega):
     R = 0.05
     L = 0.2
@@ -72,7 +75,7 @@ def normalize_angle(angle):
 
     return angle
 
-
+#PID controller
 class PID:
     def __init__(self, kp, kd, ki):
         self.p_error = 0.0
@@ -98,7 +101,7 @@ class PID:
 
 
 
-
+#Generates some test trajectory
 def generate_trajectory():
     X=[]
     Y=[]
@@ -115,7 +118,7 @@ def generate_trajectory():
 
 
 
-
+#follows waypoints. constant velocity, angular velocity is controlled with PID
 def simple_follow_waypoints(wp_x, wp_y):
 
     wp_idx = 0
