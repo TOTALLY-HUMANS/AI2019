@@ -14,13 +14,14 @@ port_robot = 5006
 
 BUFFER_SIZE = 1000000
 
-def detect_balls(fast, img):
+'''
+def detect_balls(fast, img, value):
     """Detect balls in image, return coordinates as list."""
 
     kps = fast.detect(img,None)
     kps = merge_keypoints(kps, 20)
 
-    return [kp.pt for kp in kps]
+    return [kp.pt + (value,) for kp in kps]
 
 def distance_between_points(p1, p2):
     return math.hypot(p1[0] - p2[0], p1[1] - p2[1])
@@ -39,7 +40,7 @@ def merge_keypoints(keypoints, radius):
 
     return result
 
-def maskFrame(frame):
+def maskFrame(frame, low_b, high_b):
     """
     Perform basic preprocessing to create a mask that can be overlayed over the
     image. This will dramatically reduce the search space for more complicated
@@ -55,18 +56,16 @@ def maskFrame(frame):
     # Convert the colorspace to HSV (Hue, Saturation, Value)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+    return cv2.inRange(hsv, low_b, high_b)
+
     # We want to look for bright, multicolored balls. That means we want to extract parts of the image with:
     # Any hue
     # High saturation
     # High value
-    #Greenish yellow (25,100,20) ~ (35, 255, 255)
-    yellow_mask = cv2.inRange(hsv, (25,100,20), (35,255,255))
-    return yellow_mask
-    
-'''return cv2.inRange(hsv,
+    '''return cv2.inRange(hsv,
                        np.array([0,180,180]),
                        np.array([255,255,255]))'''
-
+'''
 def main():
     print("Connecting to camera")
     client_video = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -74,7 +73,7 @@ def main():
 
     print("Initializing feature detector.")
 
-    fast = cv2.FastFeatureDetector_create()
+    #fast = cv2.FastFeatureDetector_create()
 
     print( "Initializing server")
 
@@ -87,6 +86,18 @@ def main():
 
     # Wait for robot to connect
     roboconn, addr = server_robot.accept()
+
+    #Greenish yellow hsv (25,100,150) ~ (35, 255, 255)
+    yellow_low = (25,40,80)
+    yellow_high = (40,255,255)
+    #Pink (150, 100, 150)  ~ (160, 255, 255)
+    pink_low = (150,40,80)
+    pink_high = (195,255,255)
+
+    radius_range = (13, 30)
+
+    detector = BallDetector(yellow_low,yellow_high, pink_low, pink_high,ballSizeRange=radius_range, debug=True)
+
 
     try:
         print("trying")
@@ -114,13 +125,22 @@ def main():
             print("received mockup img.")
             print(len(img))
             img = np.frombuffer(img, dtype=np.uint8).reshape(750,750,3)
-            print(len(img))
+            print(len(img))        
+            yellow_img = cv2.bitwise_and(img,img, mask= maskFrame(img, yellow_low, yellow_high))
+            #cv2.imwrite('yellow_masked.png', yellow_img)
+            pink_img = cv2.bitwise_and(img,img, mask= maskFrame(img, pink_low,pink_high))
+            #cv2.imwrite('pink_masked.png', pink_img)
 
-            img = cv2.bitwise_and(img,img, mask= maskFrame(img))
-            cv2.imwrite('masked.png', img)
-            balls = detect_balls(fast, img)
+            yellow_balls = detect_balls(fast, yellow_img, 1)
+            pink_balls = detect_balls(fast, pink_img, -1)
 
-            print(balls)
+            hough = hough_detect_balls(pink_img, -1)
+            print(hough)
+
+            balls = [*yellow_balls,*pink_balls]
+    
+            
+           
 
             balls = str(balls).encode("latin-1")
 

@@ -10,10 +10,11 @@ BUFFER_SIZE = 1000000
 def bytes_to_list(balls):
     """Convert internal byte array representation back to list of coordinate tuples."""
     string = balls.decode(encoding="latin-1")
+    print(string)
     list_of_coords = []
     coords = string.split(", ")
-    for i in range(0, len(coords), 2):
-        coord = tuple(int(x.split(".")[0].strip('[]()')) for x in (coords[i], coords[i+1]))
+    for i in range(0, len(coords), 3):
+        coord = tuple(int(x.split(".")[0].strip('[]()')) for x in (coords[i], coords[i+1], coords[i+2]))
         list_of_coords.append(coord)
     return list_of_coords
 
