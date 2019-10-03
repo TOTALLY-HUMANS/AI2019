@@ -1,10 +1,12 @@
 import keyboard
 import serial
+import time
 
 ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
 ser.isOpen()
 
 speed = 100
+left = True
 
 while True:
     vert = 0
@@ -64,7 +66,11 @@ while True:
         left = speed
         right = -left
 
+    if left:
+        data = 'R' + str(0) + 'L' + str(100) + ' '
+    else:
+        data = 'R' + str(100) + 'L' + str(0) + ' '
 
-    data = 'R' + str(right+100) + 'L' + str(left+100) + ' '
     # print data
     ser.write(data)
+    time.sleep(100)
