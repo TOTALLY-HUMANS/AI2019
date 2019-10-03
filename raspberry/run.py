@@ -65,6 +65,6 @@ while True:
         right = -left
 
 
-    data = 'R' + str(right) + 'L' + str(left) + ' '
+    data = 'R' + str(right+100) + 'L' + str(left+100) + ' '
     # print data
     ser.write(data)

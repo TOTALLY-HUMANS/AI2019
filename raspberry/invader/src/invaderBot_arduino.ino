@@ -154,7 +154,7 @@ void loop() {
         break;
     }
 
-    // motorTask();
+     motorTask();
   }
 
   // delay(100);

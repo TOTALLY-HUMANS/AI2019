@@ -1,0 +1,14 @@
+
+
+
+
+
+.build/micro/src/invaderBot_arduino.cpp : src/invaderBot_arduino.ino
+	@mkdir -p .build/micro/src
+	@echo [93msrc/invaderBot_arduino.ino[0m
+	@/usr/local/bin/ino preproc  -o $@ $^
+
+
+all : .build/micro/src/invaderBot_arduino.cpp
+	@true
+
