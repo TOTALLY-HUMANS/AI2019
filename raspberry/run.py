@@ -70,7 +70,7 @@ while True:
         data = 'R' + str(0) + 'L' + str(100) + ' '
     else:
         data = 'R' + str(100) + 'L' + str(0) + ' '
-
+    left = not left
     # print data
     ser.write(data)
     time.sleep(100)
