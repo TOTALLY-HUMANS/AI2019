@@ -1,0 +1,11 @@
+Webots Proto Cache File version 1.4
+protoFileHash: 1ae223325323c3b2ebe0c4a5b52e9bd8
+containsDevices: 0
+baseType: Transform
+slotType: 
+parameters: translation,url
+tags: 
+license:  Creative Commons Attribution 4.0 International License.
+licenseUrl:  https://creativecommons.org/licenses/by/4.0/legalcode
+documentationUrl: 
+info: A\ssimple\saruco\smarker\snode\nSemih\sIseri\s-\s2019\n

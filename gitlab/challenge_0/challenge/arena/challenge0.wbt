@@ -1,0 +1,382 @@
+#VRML_SIM R2019a utf8
+DEF _world WorldInfo {
+}
+DEF _camera Viewpoint {
+  orientation 0.9999492333382092 -0.009353548737071166 -0.0037472486374828698 5.520649396982552
+  position 0.0202617968061211 5.216689075391507 5.432864256147198
+}
+DEF my_robot Robot {
+  translation 0.04459369943112143 0.05 1.3322704754922776
+  rotation 0 -1 0 4.7123841003591735
+  children [
+    DEF GEOM_SHAPE Group {
+      children [
+        Transform {
+          translation 0 -0.005 0
+          children [
+            DEF BASE Shape {
+              appearance DEF ROBOT_MATERIAL OldSteel {
+                colorOverride 0.5 1 1
+              }
+              geometry Box {
+                size 0.28 0.04 0.2
+              }
+            }
+          ]
+        }
+        Transform {
+          translation 0.137 0.03 0
+          children [
+            DEF WHEEL_BOX Shape {
+              appearance DEF ROBOT_MATERIAL OldSteel {
+                colorOverride 0.5 1 1
+              }
+              geometry Box {
+                size 0.025 0.03 0.2
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.137 0.03 0
+          children [
+            DEF WHEEL_BOX Shape {
+              appearance DEF ROBOT_MATERIAL OldSteel {
+                colorOverride 0.5 1 1
+              }
+              geometry Box {
+                size 0.025 0.025 0.2
+              }
+            }
+          ]
+        }
+      ]
+    }
+    DEF LEFT_TRACK Track {
+      translation 0 0 -0.12
+      scale 0.5 0.5 0.5
+      children [
+        DEF WHEEL1 TrackWheel {
+          position -0.30000000000000004 0.05
+          radius 0.04
+          children [
+            DEF TRACK_WHEEL_BIG Transform {
+              rotation 1 0 0 1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry Cylinder {
+                    height 0.075
+                    radius 0.04
+                    subdivision 20
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        DEF WHEEL2 TrackWheel {
+          position 0.3 0.05
+          radius 0.04
+          children [
+            USE TRACK_WHEEL_BIG
+          ]
+        }
+        DEF WHEEL3 TrackWheel {
+          position 0.215 -0.05
+          radius 0.04
+          children [
+            DEF TRACK_WHEEL_SMALL Transform {
+              rotation 1 0 0 1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    roughness 1
+                    metalness 0
+                  }
+                  geometry Cylinder {
+                    height 0.075
+                    radius 0.04
+                    subdivision 20
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        DEF WHEEL4 TrackWheel {
+          position -0.215 -0.05
+          radius 0.04
+          children [
+            USE TRACK_WHEEL_SMALL
+          ]
+        }
+      ]
+      name "left track"
+      contactMaterial "track material"
+      boundingObject DEF TRACK_BO Group {
+        children [
+          Transform {
+            translation 0 -0.015 0
+            children [
+              Box {
+                size 0.30000000000000004 0.185 0.075
+              }
+            ]
+          }
+          Transform {
+            translation 0.26 -0.04 0
+            rotation 0 0 -1 5.4035477300000005
+            children [
+              Box {
+                size 0.09 0.03 0.075
+              }
+            ]
+            translationStep 0.001
+            rotationStep 0.00261799
+          }
+          Transform {
+            translation -0.26 -0.04 0
+            rotation 0 0 -0.9999999999999999 0.8639534887183441
+            children [
+              Box {
+                size 0.09 0.03 0.075
+              }
+            ]
+            translationStep 0.001
+            rotationStep 0.00261799
+          }
+          Transform {
+            translation -0.3 0.04999999999966268 0
+            rotation 1 0 0 1.5708
+            children [
+              DEF WHEEL_BO Cylinder {
+                height 0.075
+                radius 0.04
+                subdivision 14
+              }
+            ]
+          }
+          Transform {
+            translation 0.3 0.05 0
+            rotation 1 0 0 1.5708
+            children [
+              USE WHEEL_BO
+            ]
+          }
+        ]
+      }
+      physics Physics {
+      }
+      device [
+        LinearMotor {
+          name "motor_left"
+          maxVelocity 1
+          minPosition -1e+99
+          maxPosition 1e+99
+          maxForce 1
+        }
+      ]
+      textureAnimation -0.033 0
+      animatedGeometry DEF ANIMATED_GEOM Group {
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.141176 0.141176 0.141176
+              roughness 1
+              metalness 0
+            }
+            geometry Box {
+              size 0.044 0.005 0.075
+            }
+          }
+          Transform {
+            translation 0 0.003 0
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.141176 0.141176 0.141176
+                  roughness 1
+                  metalness 0
+                }
+                geometry Box {
+                  size 0.02 0.006 0.03
+                }
+              }
+            ]
+          }
+        ]
+      }
+      geometriesCount 40
+    }
+    DEF RIGHT_TRACK Track {
+      translation 0 0 0.12
+      scale 0.5 0.5 0.5
+      children [
+        USE WHEEL1
+        USE WHEEL2
+        USE WHEEL3
+        USE WHEEL4
+      ]
+      name "right track"
+      contactMaterial "track material"
+      boundingObject USE TRACK_BO
+      physics Physics {
+      }
+      device [
+        LinearMotor {
+          name "motor_right"
+          maxVelocity 1
+          minPosition -1e+99
+          maxPosition 1e+99
+          maxForce 1
+        }
+      ]
+      animatedGeometry USE ANIMATED_GEOM
+      geometriesCount 40
+    }
+  ]
+  name "tracked robot"
+  boundingObject DEF BASE Shape {
+    appearance USE ROBOT_MATERIAL
+    geometry Box {
+      size 0.28 0.05 0.2
+    }
+  }
+  physics Physics {
+    density -1
+    mass 40
+  }
+  locked TRUE
+  controller "my_robot"
+}
+DEF _global_light DirectionalLight {
+  ambientIntensity 1
+  direction 0 -1 0
+  intensity 0.7
+  castShadows TRUE
+}
+DEF _lights Group {
+  children [
+    Solid {
+      translation 0 1.550000000000001 -4
+      children [
+        PointLight {
+          color 0.8 0.93 0.93
+          location 0 0.3 0
+        }
+      ]
+      name "solid(5)"
+    }
+    Solid {
+      translation 1.7499999999999998 1.05 -3.3
+      children [
+        PointLight {
+          color 1 0.8 0.8
+          location 0 0.3 0
+        }
+      ]
+      name "solid(4)"
+    }
+    Solid {
+      translation -1.75 1.05 -3.3
+      children [
+        PointLight {
+          color 1 0.8 0.8
+          location 0 0.3 0
+        }
+      ]
+      name "solid(3)"
+    }
+  ]
+}
+DEF _ground RectangleArena {
+  translation 0 -0.12000000000000002 0
+  floorSize 4 4
+  floorTileSize 1 1
+  floorAppearance ThreadMetalPlate {
+  }
+  wallThickness 0.015
+  wallHeight 0.3
+  wallAppearance OldSteel {
+  }
+}
+DEF _coins Group {
+  children [
+    DEF COIN Transform {
+      translation -1.5 0 -1.5
+      rotation 0 1 0 28.383185307179726
+      children [
+        Transform {
+          rotation 1 0 0 1.5707962836408271
+          children [
+            DEF Coin Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.8730601968413825 0.8625162127107653 0
+                }
+              }
+              geometry Cylinder {
+                height 0.01
+                radius 0.12
+              }
+            }
+          ]
+        }
+      ]
+    }
+    DEF COIN Transform {
+      translation 1.5 0 -1.5
+      rotation 0 1 0 28.383185307179726
+      children [
+        Transform {
+          rotation 1 0 0 1.5707962836408271
+          children [
+            DEF Coin Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.8730601968413825 0.8625162127107653 0
+                }
+              }
+              geometry Cylinder {
+                height 0.01
+                radius 0.12
+              }
+            }
+          ]
+        }
+      ]
+    }
+    DEF COIN Transform {
+      translation 0 0 -1
+      rotation 0 1 0 28.383185307179726
+      children [
+        Transform {
+          rotation 1 0 0 1.5707962836408271
+          children [
+            DEF Coin Shape {
+              appearance Appearance {
+                material Material {
+                  diffuseColor 0.8730601968413825 0.8625162127107653 0
+                }
+              }
+              geometry Cylinder {
+                height 0.01
+                radius 0.12
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+DEF _coin_handler Robot {
+  name "_coin_handler"
+  locked TRUE
+  controller "_coin"
+  supervisor TRUE
+}
