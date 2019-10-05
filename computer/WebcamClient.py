@@ -4,8 +4,10 @@ import math
 #import imutils
 import cv2
 import numpy as np
+from cv2 import aruco
 from ball_detector import BallDetector
-from cv2 import aruco 
+from aruco_detector import ArucoDetector
+
 
 # Greenish yellow hsv (25,100,150) ~ (35, 255, 255)
 yellow_low = np.array([25, 50, 160])
@@ -15,42 +17,16 @@ pink_low = np.array([150, 50, 160])
 pink_high = np.array([175, 255, 255])
 
 radius_range = [13, 30]
-
-# Default parameters are enough
-parameters =  aruco.DetectorParameters_create()
-# Using aruco 4x4 with ids 0 - 49
-aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
-
-def visualize_detected(img,balls,aruco_corners,aruco_ids,positions):
-    for ball in balls:
-        x, y, r, v = ball
-        color = (127, 0, 255)
-        if v == 1:
-            color = (0, 179, 255)
-            cv2.circle(img, (x, y), r, color, 2)
-    aruco.drawDetectedMarkers(img,aruco_corners,aruco_ids)
-    for p in positions:
-        x,z,theta,id = p
-        x = int(x)
-        z = int(z)
-        center = (x,z)
-        length = 20
-        forward = (int(x+length*np.cos(theta)),int(z+length*np.sin(theta)))
-        color = (0,0,255)
-        cv2.circle(img,center,2,color, 2)
-        cv2.line(img, center, forward ,color, 2)
-    cv2.imshow('Detected', img)
-    key = cv2.waitKey(1)
-
-
+    
 def main():
     print("Connecting to camera")
     camera = cv2.VideoCapture("ArucoVideo.ts")
 
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
-                            pink_high, ballSizeRange=radius_range, debug=True)
+                                 pink_high, ballSizeRange=radius_range, debug=False)
     print("Initializing aruco detector")
+    aruco_detector = ArucoDetector()
 
     try:
         print("trying")
@@ -59,28 +35,38 @@ def main():
             ret, img = camera.read()
 
             balls = ball_detector.detect_balls(img)
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(img, aruco_dict, parameters=parameters)
-            positions = []
-            if ids is not None:
-                for i in range(len(corners)):
-                    c = corners[i][0]
-                    x = 0.25 * (c[0][0] + c[1][0] + c[2][0] + c[3][0])
-                    z = 0.25 * (c[0][1] + c[1][1] + c[2][1] + c[3][1])
-                    theta = math.atan2(c[0][1] - c[1][1], c[0][0] - c[1][0])
-                    pos = (x, z, theta, ids[i])
-                    positions.append(pos)
+
+            corners, ids = aruco_detector.get_arucos(img)
+            positions = aruco_detector.get_positions(corners,ids)
 
             visualize_detected(img, balls, corners, ids, positions)
-            #print(balls)
-            # time.sleep(1)
-            if ids is not None:
-                print("Aruco(s) spotted", ids, corners)
-            else:
-                print("-")
     except:
         raise
     finally:
         print("closed.")
+
+
+def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
+    for ball in balls:
+        x, y, r, v = ball
+        color = (127, 0, 255)
+        if v == 1:
+            color = (0, 179, 255)
+        cv2.circle(img, (x,y), 2, color, 2)
+        cv2.circle(img, (x, y), r, color, 2)
+    aruco.drawDetectedMarkers(img, aruco_corners, aruco_ids)
+    for p in positions:
+        x, z, theta, id = p
+        x = int(x)
+        z = int(z)
+        center = (x, z)
+        length = 20
+        forward = (int(x+length*np.cos(theta)), int(z+length*np.sin(theta)))
+        color = (0, 0, 255)
+        cv2.circle(img, center, 2, color, 2)
+        cv2.line(img, center, forward, color, 2)
+    cv2.imshow('Detected', img)
+    key = cv2.waitKey(1)
 
 
 if __name__ == "__main__":
