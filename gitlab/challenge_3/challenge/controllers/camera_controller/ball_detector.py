@@ -59,11 +59,11 @@ class BallDetector:
         """
         # Blur the image to reduce high frequency noise
         #frame = cv2.GaussianBlur(frame,(7,7),0);
-        '''
+        
         mask = cv2.medianBlur(frame, 3)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
-        '''
+        
         mask = frame
 
         # Convert the colorspace to HSV (Hue, Saturation, Value)
