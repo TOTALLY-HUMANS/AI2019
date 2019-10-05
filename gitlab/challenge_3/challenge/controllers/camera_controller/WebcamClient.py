@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import time
 import math
-import imutils
+#import imutils
 import cv2
 import numpy as np
 from ball_detector import BallDetector
@@ -22,7 +22,7 @@ def nothing(x):
 
 def main():
     print("Connecting to camera")
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(1)
 
     print("Initializing feature detector.")
 
