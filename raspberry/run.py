@@ -67,7 +67,11 @@ while True:
         left = speed
         right = -left
     '''
+<<<<<<< HEAD
     
+=======
+    data = 'R0L0'
+>>>>>>> 0c1d4e64dac39369170b58fa01d0ab178eee861d
     if left:
         data = 'R' + str(0) + 'L' + str(100) + ' '
     else:
@@ -76,4 +80,8 @@ while True:
 #    print data
     time.sleep(1000)
     ser.write(data)
+<<<<<<< HEAD
    # time.sleep(100)
+=======
+    #time.sleep(100)
+>>>>>>> 0c1d4e64dac39369170b58fa01d0ab178eee861d
