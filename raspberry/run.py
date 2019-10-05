@@ -9,6 +9,7 @@ speed = 100
 left = True
 
 while True:
+    '''
     vert = 0
     horz = 0
 
@@ -65,7 +66,8 @@ while True:
     elif horz == -1 and vert == 0:
         left = speed
         right = -left
-
+    '''
+    data = 'R0L0'
     if left:
         data = 'R' + str(0) + 'L' + str(100) + ' '
     else:
@@ -73,4 +75,4 @@ while True:
     left = not left
     # print data
     ser.write(data)
-    time.sleep(100)
+    #time.sleep(100)
