@@ -56,7 +56,7 @@ void motorTask()
   delay(1);
   analogWrite(9, pinPwm[3]);
   delay(1);
-
+/*
   Serial.print(pinPwm[0]);
   Serial.print(" ");
   Serial.print(pinPwm[1]);
@@ -70,6 +70,7 @@ void motorTask()
   Serial.print(" ");
   Serial.print(motorSpeed[1]);
   Serial.println(" ");
+  */
 }
 
 void batteryTask()
@@ -82,13 +83,14 @@ void batteryTask()
   c2 = c2*2-c1;
   c3 = c3*3-c2-c1;
 
+/*
   Serial.print("Battery: ");
   Serial.print(c1);
   Serial.print(" ");
   Serial.print(c2);
   Serial.print(" ");
   Serial.println(c3);
-
+*/
   if (true)
   {
     digitalWrite(6, HIGH);
