@@ -4,3 +4,4 @@ s.connect(('servu',50001))
 message = "BEEP!"                                                                                                      
 s.sendall(message.encode())                                                                                            
 data = s.recv(1024).decode()
+print(data)
