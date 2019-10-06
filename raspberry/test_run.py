@@ -17,7 +17,7 @@ def main():
 	message = "BEEP!"
 	while 1:
 		s.sendall(message.encode())
-		data = s.recv(1024).decode()
+		data = s.recv(512).decode()
 		print(data)
 		split_data = data.split('#')
 		print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
