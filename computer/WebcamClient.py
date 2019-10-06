@@ -17,29 +17,44 @@ pink_low = np.array([150, 50, 160])
 pink_high = np.array([175, 255, 255])
 
 radius_range = [13, 30]
+
+url = "udp://224.0.0.0:1234"
     
 def main():
     print("Connecting to camera")
-    camera = cv2.VideoCapture("ArucoVideo.ts")
+    camera = cv2.VideoCapture(url)
+
+    width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
+    height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    print("Connected to camera, resolution is %ix%i" % (width, height))
+
 
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
+    skip = 2
 
     try:
         print("trying")
         while 1:
             print("Listening for image...")
             ret, img = camera.read()
+            skip +=1
+            if skip%2 == 0:
+                if img is None:
+                    print("No frame")
 
-            balls = ball_detector.detect_balls(img)
+                    camera.release()
+                    camera.open(url)
+                if ret:
+                    balls = ball_detector.detect_balls(img)
 
-            corners, ids = aruco_detector.get_arucos(img)
-            positions = aruco_detector.get_positions(corners,ids)
+                    corners, ids = aruco_detector.get_arucos(img)
+                    positions = aruco_detector.get_positions(corners,ids)
 
-            visualize_detected(img, balls, corners, ids, positions)
+                    visualize_detected(img, balls, corners, ids, positions)
     except:
         raise
     finally:
