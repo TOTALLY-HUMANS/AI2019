@@ -11,7 +11,7 @@ from aruco_detector import ArucoDetector
 
 from my_robot import drive_commands
 from socket_interface import socketInterface
-
+from video_capture import VideoCapture
 # Greenish yellow hsv (25,100,150) ~ (35, 255, 255)
 yellow_low = np.array([25, 50, 160])
 yellow_high = np.array([35, 255, 255])
@@ -23,20 +23,19 @@ radius_range = [13, 30]
 
 url = "udp://224.0.0.0:1234"
 
-def grabber_thread(camera):
-    r = camera.grab()
+
     
 def main():
     #SI = socketInterface()
     
     print("Connecting to camera")
-    camera = cv2.VideoCapture(url)
+    camera = VideoCapture(url)
     #camera.set(cv2.CV_CAP_PROP_BUFFERSIZE,1)
-    status = camera.set(cv2.CAP_PROP_BUFFERSIZE, 0)
+    #status = camera.set(cv2.CAP_PROP_BUFFERSIZE, 0)
 
-    width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
-    height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    print("Connected to camera, resolution is %ix%i" % (width, height))
+    #width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
+    #height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    #print("Connected to camera, resolution is %ix%i" % (width, height))
 
 
     print("Initializing ball detector.")
