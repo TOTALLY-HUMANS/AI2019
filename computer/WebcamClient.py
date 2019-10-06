@@ -23,6 +23,8 @@ url = "udp://224.0.0.0:1234"
 def main():
     print("Connecting to camera")
     camera = cv2.VideoCapture(url)
+    #camera.set(cv2.CV_CAP_PROP_BUFFERSIZE,1)
+    s = camera.set(cv2.CAP_PROP_BUFFERSIZE, 3)
 
     width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
     height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -41,7 +43,9 @@ def main():
         while 1:
             #print("Listening for image...")  
             skip +=1
-            if skip%10 == 0:
+            if skip%1 == 0:
+                camera.release()
+                camera.open(url)
                 ret, img = camera.read()
                 if img is None:
                     print("No frame")
