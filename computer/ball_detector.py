@@ -19,10 +19,6 @@ class BallDetector:
             self.create_debug_windows()
             self.create_trackbars()
             
-            
-
-
-
 
     def detect_balls(self, img):
         yellow_mask = self.maskFrame(img, self.yellowLowTres, self.yellowHighTres)
@@ -88,7 +84,6 @@ class BallDetector:
         cv2.imshow('yellow', yellow_mask)
         cv2.imshow('pink', pink_mask)
         cv2.imshow('debug', img)
-        cv2.imwrite('test.png',img)
         key = cv2.waitKey(1)
 
     def create_debug_windows(self):

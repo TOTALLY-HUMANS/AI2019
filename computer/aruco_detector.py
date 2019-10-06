@@ -1,73 +1,36 @@
 import numpy as np
 import cv2
-from cv2 import aruco 
+import math
+from cv2 import aruco
 
 # Install numpy and opencv including aruco with pip
 # -> pip install numpy
 # -> pip install opencv-contrib-python
 # https://stackoverflow.com/questions/45972357/python-opencv-aruco-no-module-named-cv2-aruco
 
-# To use webcam -> cv2.VideoCapture(0)
-# To use udp steam -> cv2.VideoCapture("udp://@224.0.0.0:1234") 
-#cap = cv2.VideoCapture("ArucoVideo.ts") # use a test video
-cap = cv2.VideoCapture(1)
-# Get the video dimensios
-width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-print(width, height)
+class ArucoDetector:
 
-# Default parameters are enough
-parameters =  aruco.DetectorParameters_create()
-# Using aruco 4x4 with ids 0 - 49
-aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
+    def __init__(self):
+        # Default parameters are enough
+        self.parameters = aruco.DetectorParameters_create()
+        # Using aruco 4x4 with ids 0 - 49
+        self.aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
+    
+    def get_arucos(self, img):
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(
+            img, self.aruco_dict, parameters=self.parameters)
+        return (corners, ids)
 
-# You can generate arucos from
-# http://chev.me/arucogen/
-
-# We will give your personal aruco markers later. 
-# (The size of the marker will be 12cm 
-# with 1.5 cm white borders. So 15cm x 15cm. 
-# Note: The size is not finalized yet. 
-# So the dimension might chance slightly.)
-
-# Each aruco code represents a number (id) between 0 - 49.
-# Each teams will receive 2 aruco markers, one for each bot.
-
-# IDs of the teams will be from 10 to 30. 
-# e.g. Your ids could be 14 & 15. 
-# Then the ids of enemies will be 10-13 and 16-30 
-
-# The video will be 60 fps. Sometimes it might be clever to
-# skip some frames. Not needed though. Depending on the performance of
-# the computer and algorithms.
-skipCounter = 0
-
-while(True):
-
-    # Take the frame
-    cap.grab()
-
-    # Without "True or", every 2nd frame wouldn't be proccessed
-    skipCounter += 1
-    if True or skipCounter % 2 == 0:
-
-        # Retrive the frame
-        ret, frame = cap.read()
-
-        # Run the aruco decection
-        # Return lists of the detected arucos
-        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, aruco_dict, parameters=parameters)
-
+    def get_positions(self, corners, ids):
+        positions = []
         if ids is not None:
-            print("Aruco(s) spotted", ids, corners)
-        else:
-            print("-")
-            
-    # Quitting 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Close everything
-cap.release()
-cv2.destroyAllWindows()
+            for i in range(len(corners)):
+                # https://gitlab.com/artificial-invaders-2019/ai-sample-stack
+                c = corners[i][0]
+                x = 0.25 * (c[0][0] + c[1][0] + c[2][0] + c[3][0])
+                z = 0.25 * (c[0][1] + c[1][1] + c[2][1] + c[3][1])
+                theta = math.atan2(c[0][1] - c[1][1], c[0][0] - c[1][0])
+                pos = (x, z, theta, ids[i])
+                positions.append(pos)
+        return positions
