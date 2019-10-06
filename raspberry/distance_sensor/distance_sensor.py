@@ -2,37 +2,46 @@
 import RPi.GPIO as GPIO
 import time
 
-try:
-      GPIO.setmode(GPIO.BOARD)
 
-      PIN_TRIGGER = 7
-      PIN_ECHO = 11
+class Distance:
+    def __init__(self, TRIG = 15, ECHO = 15, warnings=False):
+        GPIO.setmode(GPIO.BCM)  # Set GPIO pin numbering
 
-      GPIO.setup(PIN_TRIGGER, GPIO.OUT)
-      GPIO.setup(PIN_ECHO, GPIO.IN)
+        self.TRIG = TRIG  # Associate pin 15 to TRIG
+        self.ECHO = ECHO  # Associate pin 14 to Echo
 
-      GPIO.output(PIN_TRIGGER, GPIO.LOW)
+        print "Distance measurement in progress"
 
-      print "Waiting for sensor to settle"
+        GPIO.setwarnings(warnings)
+        GPIO.setup(self.TRIG, GPIO.OUT)  # Set pin as GPIO out
+        GPIO.setup(self.ECHO, GPIO.IN)  # Set pin as GPIO in
 
-      time.sleep(2)
+        GPIO.output(self.TRIG, False)  # Set TRIG as LOW
+        print "Waiting For Sensor To Settle"
+        time.sleep(2)  # Delay of 2 seconds
 
-      print "Calculating distance"
+        GPIO.output(self.TRIG, True)  # Set TRIG as HIGH
+        time.sleep(0.00001)  # Delay of 0.00001 seconds
+        GPIO.output(self.TRIG, False)  # Set TRIG as LOW
 
-      GPIO.output(PIN_TRIGGER, GPIO.HIGH)
+    """
+    Measure distance using an ultrasonic module
+    """
+    def get_distance(self):
 
-      time.sleep(0.00001)
+        while GPIO.input(self.ECHO) == 0:  # Check if Echo is LOW
+            pulse_start = time.time()  # Time of the last LOW pulse
 
-      GPIO.output(PIN_TRIGGER, GPIO.LOW)
+        while GPIO.input(self.ECHO) == 1:  # Check whether Echo is HIGH
+            pulse_end = time.time()  # Time of the last HIGH pulse
 
-      while GPIO.input(PIN_ECHO)==0:
-            pulse_start_time = time.time()
-      while GPIO.input(PIN_ECHO)==1:
-            pulse_end_time = time.time()
+        pulse_duration = pulse_end - pulse_start  # pulse duration to a variable
 
-      pulse_duration = pulse_end_time - pulse_start_time
-      distance = round(pulse_duration * 17150, 2)
-      print "Distance:",distance,"cm"
+        distance = round(pulse_duration * 17150, 2)
 
-finally:
-      GPIO.cleanup()
+        if 20 < distance < 400:  # Is distance within range
+            print "Distance:", distance - 0.5, "cm"  # Distance with calibration
+            return distance
+        else:
+            print "Out Of Range"  # display out of range
+            return -1
