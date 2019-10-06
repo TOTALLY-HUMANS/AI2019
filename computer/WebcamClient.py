@@ -9,6 +9,8 @@ from cv2 import aruco
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
 
+from my_robot import drive_commands
+from socket_interface import socketInterface
 
 # Greenish yellow hsv (25,100,150) ~ (35, 255, 255)
 yellow_low = np.array([25, 50, 160])
@@ -25,6 +27,8 @@ def grabber_thread(camera):
     r = camera.grab()
     
 def main():
+    SI = socketInterface()
+    
     print("Connecting to camera")
     camera = cv2.VideoCapture(url)
     #camera.set(cv2.CV_CAP_PROP_BUFFERSIZE,1)
@@ -47,9 +51,15 @@ def main():
         print("trying")
         while 1:
             #print("Listening for image...")  
+<<<<<<< HEAD
             #skip +=1
             if skip%1 == 0:
                 #camera.release()
+=======
+            skip +=1
+            if skip%5 == 0:
+                camera.release()
+>>>>>>> abb88f0f37f66b8871c3b497335a1c4fe6f7d905
                 camera.open(url)
                 #img = camera.grab()
                 ret, img = camera.read()
@@ -68,8 +78,53 @@ def main():
 
                     visualize_detected(img, balls, corners, ids, positions)
                     
+                    for i in ids:
+                      print("id: " , str(i))
+                    
                     #cv2.imshow('img',img)
-            
+                    robot_pose = (0.0,0.0,0.0)
+                    for pos in positions:
+
+                      if pos[3] == 16:
+                        robot_pose = pos
+                    ball_found = False
+                    if len(balls) > 0:
+                      ball_pose = balls[0]
+                      ball_x = ball_pose[0]
+                      ball_y = ball_pose[1]
+                      ball_found = True
+
+                    robot_x = robot_pose[0]
+                    robot_y = robot_pose[1]
+                    robot_yaw = robot_pose[2]
+                    
+                                        #ohjauskomento
+                    r_com = 0.0
+                    l_com = 0.0
+                    deadzone = 90
+                    brakezone = 50
+                    if ball_found:
+                      r_com, l_com = drive_commands(ball_x, ball_y, robot_x, robot_y, robot_yaw)
+                      r_com = 255*r_com
+                      l_com = 255*l_com
+                      
+                      if abs(r_com) < brakezone:
+                        r_com = 0
+                      elif abs(r_com) < deadzone:
+                          if r_com < 0:
+                            r_com = r_com - deadzone
+                          if r_com > 0: 
+                            r_com = r_com + deadzone
+                      if abs(l_com) < brakezone:
+                        l_com = 0
+                      elif abs(l_com) < deadzone:
+                          if l_com < 0:
+                            l_com = l_com - deadzone
+                          if r_com > 0: 
+                            l_com = l_com + deadzone
+                            
+                    #ohjauskomento sokettiin
+                    SI.send_command(r_com, l_com)
             
     except:
         raise
