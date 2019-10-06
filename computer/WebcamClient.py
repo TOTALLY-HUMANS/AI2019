@@ -27,12 +27,12 @@ def grabber_thread(camera):
     r = camera.grab()
     
 def main():
-    SI = socketInterface()
+    #SI = socketInterface()
     
     print("Connecting to camera")
     camera = cv2.VideoCapture(url)
     #camera.set(cv2.CV_CAP_PROP_BUFFERSIZE,1)
-    status = camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    status = camera.set(cv2.CAP_PROP_BUFFERSIZE, 0)
 
     width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
     height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -46,22 +46,20 @@ def main():
     aruco_detector = ArucoDetector()
     skip = 1
     print("Starting hack...")
-    t = threading.Thread(target=grabber_thread, args=(camera,))
+    #t = threading.Thread(target=grabber_thread, args=(camera,))
+    #t.start()
     try:
         print("trying")
         while 1:
+            
             #print("Listening for image...")  
-<<<<<<< HEAD
-            #skip +=1
+            #skip +
             if skip%1 == 0:
-                #camera.release()
-=======
-            skip +=1
-            if skip%5 == 0:
-                camera.release()
->>>>>>> abb88f0f37f66b8871c3b497335a1c4fe6f7d905
-                camera.open(url)
+                
+                #camera.open(url)
                 #img = camera.grab()
+                #for i in range(4):
+                    #e = camera.grab()
                 ret, img = camera.read()
                 if img is None:
                     print("No frame")
@@ -78,6 +76,7 @@ def main():
 
                     visualize_detected(img, balls, corners, ids, positions)
                     
+                    '''
                     for i in ids:
                       print("id: " , str(i))
                     
@@ -125,6 +124,8 @@ def main():
                             
                     #ohjauskomento sokettiin
                     SI.send_command(r_com, l_com)
+                    '''
+                #camera.release()
             
     except:
         raise
