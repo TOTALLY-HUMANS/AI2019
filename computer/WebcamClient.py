@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import time
 import math
+import threading
 #import imutils
 import cv2
 import numpy as np
@@ -19,12 +20,15 @@ pink_high = np.array([175, 255, 255])
 radius_range = [13, 30]
 
 url = "udp://224.0.0.0:1234"
+
+def grabber_thread(camera):
+    r = camera.grab()
     
 def main():
     print("Connecting to camera")
     camera = cv2.VideoCapture(url)
     #camera.set(cv2.CV_CAP_PROP_BUFFERSIZE,1)
-    s = camera.set(cv2.CAP_PROP_BUFFERSIZE, 3)
+    status = camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
     width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
     height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -36,16 +40,18 @@ def main():
                                  pink_high, ballSizeRange=radius_range, debug=False)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
-    skip = 0
-
+    skip = 1
+    print("Starting hack...")
+    t = threading.Thread(target=grabber_thread, args=(camera,))
     try:
         print("trying")
         while 1:
             #print("Listening for image...")  
-            skip +=1
+            #skip +=1
             if skip%1 == 0:
-                camera.release()
+                #camera.release()
                 camera.open(url)
+                #img = camera.grab()
                 ret, img = camera.read()
                 if img is None:
                     print("No frame")
