@@ -56,7 +56,7 @@ void motorTask()
   delay(1);
   analogWrite(9, pinPwm[3]);
   delay(1);
-
+/*
   Serial.print(pinPwm[0]);
   Serial.print(" ");
   Serial.print(pinPwm[1]);
@@ -70,7 +70,7 @@ void motorTask()
   Serial.print(" ");
   Serial.print(motorSpeed[1]);
   Serial.println(" ");
-  
+*/  
 }
 
 void batteryTask()
@@ -99,7 +99,8 @@ void batteryTask()
 
 void setup() {
   Serial.begin(9600);
-  
+  Serial.setTimeout(50);  
+
   // Motor Driver;
   pinMode(13, OUTPUT);
   pinMode(11, OUTPUT);
