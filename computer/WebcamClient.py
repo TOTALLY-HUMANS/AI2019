@@ -8,6 +8,8 @@ from cv2 import aruco
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
 
+from my_robot import drive_commands
+from socket_interface import socketInterface
 
 # Greenish yellow hsv (25,100,150) ~ (35, 255, 255)
 yellow_low = np.array([25, 50, 160])
@@ -21,6 +23,8 @@ radius_range = [13, 30]
 url = "udp://224.0.0.0:1234"
     
 def main():
+    SI = socketInterface()
+    
     print("Connecting to camera")
     camera = cv2.VideoCapture(url)
     #camera.set(cv2.CV_CAP_PROP_BUFFERSIZE,1)
@@ -43,7 +47,7 @@ def main():
         while 1:
             #print("Listening for image...")  
             skip +=1
-            if skip%1 == 0:
+            if skip%5 == 0:
                 camera.release()
                 camera.open(url)
                 ret, img = camera.read()
@@ -62,8 +66,33 @@ def main():
 
                     visualize_detected(img, balls, corners, ids, positions)
                     
+                    for i in ids:
+                      print("id: " , str(i))
+                    
                     #cv2.imshow('img',img)
-            
+                    robot_pose = (0.0,0.0,0.0)
+                    for pos in positions:
+
+                      if pos[3] == 16:
+                        robot_pose = pos
+                    ball_found = False
+                    if len(balls) > 0:
+                      ball_pose = balls[0]
+                      ball_x = ball_pose[0]
+                      ball_y = ball_pose[1]
+                      ball_found = True
+
+                    robot_x = robot_pose[0]
+                    robot_y = robot_pose[1]
+                    robot_yaw = robot_pose[2]
+                    
+                                        #ohjauskomento
+                    
+                    if ball_found:
+                      r_com, l_com = drive_commands(ball_x, ball_y, robot_x, robot_y, robot_yaw)
+                    
+                    #ohjauskomento sokettiin
+                    SI.send_command(128*r_com, 128*l_com)
             
     except:
         raise
