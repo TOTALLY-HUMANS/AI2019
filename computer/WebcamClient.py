@@ -87,12 +87,32 @@ def main():
                     robot_yaw = robot_pose[2]
                     
                                         #ohjauskomento
-                    
+                    r_com = 0.0
+                    l_com = 0.0
+                    deadzone = 90
+                    brakezone = 50
                     if ball_found:
                       r_com, l_com = drive_commands(ball_x, ball_y, robot_x, robot_y, robot_yaw)
-                    
+                      r_com = 255*r_com
+                      l_com = 255*l_com
+                      
+                      if abs(r_com) < brakezone:
+                        r_com = 0
+                      elif abs(r_com) < deadzone:
+                          if r_com < 0:
+                            r_com = r_com - deadzone
+                          if r_com > 0: 
+                            r_com = r_com + deadzone
+                      if abs(l_com) < brakezone:
+                        l_com = 0
+                      elif abs(l_com) < deadzone:
+                          if l_com < 0:
+                            l_com = l_com - deadzone
+                          if r_com > 0: 
+                            l_com = l_com + deadzone
+                            
                     #ohjauskomento sokettiin
-                    SI.send_command(128*r_com, 128*l_com)
+                    SI.send_command(r_com, l_com)
             
     except:
         raise
