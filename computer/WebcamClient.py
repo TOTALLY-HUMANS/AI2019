@@ -34,27 +34,33 @@ def main():
                                  pink_high, ballSizeRange=radius_range, debug=False)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
-    skip = 2
+    skip = 0
 
     try:
         print("trying")
         while 1:
-            print("Listening for image...")
-            ret, img = camera.read()
+            #print("Listening for image...")  
             skip +=1
-            if skip%2 == 0:
+            if skip%10 == 0:
+                ret, img = camera.read()
                 if img is None:
                     print("No frame")
 
                     camera.release()
                     camera.open(url)
+        
                 if ret:
+                    
                     balls = ball_detector.detect_balls(img)
 
                     corners, ids = aruco_detector.get_arucos(img)
                     positions = aruco_detector.get_positions(corners,ids)
 
                     visualize_detected(img, balls, corners, ids, positions)
+                    
+                    #cv2.imshow('img',img)
+            
+            
     except:
         raise
     finally:
