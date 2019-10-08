@@ -40,7 +40,7 @@ class BallDetector:
 
     def detect_blobs(self,img, value):
         kps = self.fast.detect(img,None)
-        kps =  merge_keypoints(kps,30)
+        kps =  merge_keypoints(kps,35)
         return [ kp.pt for kp in kps]
 
     def detect_balls(self, img):
@@ -86,11 +86,11 @@ class BallDetector:
         #cv2.imshow("masked"+str(value), img)
         if img.shape[0] == 0 or img.shape[1] == 0:
             return []
-        print(img.shape)
+        #print(img.shape)
         circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1,
                                    img.shape[0]/64, param1=100, param2=8, minRadius=self.ballSizeRange[0], maxRadius=self.ballSizeRange[1])
         if circles is None:
-            print("No circles found")
+            #print("No circles found")
             return []
         circles = np.round(circles[0, :]).astype("int")
         r = [tuple(x)+(value,) for x in circles]

@@ -25,7 +25,7 @@ yellow_high = np.array([35, 255, 255])
 pink_low = np.array([150, 50, 160])
 pink_high = np.array([175, 255, 255])
 
-radius_range = [13, 30]
+radius_range = [13, 25]
 
 url = "udp://224.0.0.0:1234"
 # print(cv2.getBuildInformation())
@@ -35,9 +35,9 @@ def main():
     # SI = socketInterface()
 
     print("Connecting to camera")
-    cap = AvVideoCapture(url)
+    #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    #cap = cv2.VideoCapture('videos/Balls2.ts')
+    cap = cv2.VideoCapture('videos/Balls2.ts')
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
@@ -55,7 +55,7 @@ def main():
             if ret:
 
                 
-                img = downscale_image(img, 90)
+                #img = downscale_image(img, 90)
 
                 # img = downscale_image(img,80)
                 balls = ball_detector.detect_balls(img)
