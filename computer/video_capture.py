@@ -1,10 +1,15 @@
 import cv2, queue, threading, time
-
-# bufferless VideoCapture
+#DON'T USE THIS
+# bufferless VideoCapture https://stackoverflow.com/a/54755738
 class VideoCapture:
 
   def __init__(self, name):
-    self.cap = cv2.VideoCapture(name)
+    self.cap = cv2.VideoCapture(name, cv2.CAP_FFMPEG)
+    self.cap.set(cv2.CAP_PROP_BUFFERSIZE, -1)
+    self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('H','2','6','4'))
+    self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    self.cap.set(cv2.CAP_PROP_FPS, 30)
     self.q = queue.Queue()
     t = threading.Thread(target=self._reader)
     t.daemon = True
@@ -19,7 +24,7 @@ class VideoCapture:
       if not self.q.empty():
         try:
           self.q.get_nowait()   # discard previous (unprocessed) frame
-        except Queue.Empty:
+        except queue.Empty:
           pass
       self.q.put(frame)
 

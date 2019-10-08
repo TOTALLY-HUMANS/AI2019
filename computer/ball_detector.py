@@ -6,6 +6,24 @@ import numpy as np
 def nothing(x):
     return
 
+def distance_between_points(p1, p2):
+    return math.hypot(p1[0] - p2[0], p1[1] - p2[1])
+
+def has_close_points(point, others, radius):
+    for other in others:
+        if (distance_between_points(point.pt, other.pt) < radius):
+            return True
+    return False
+
+def merge_keypoints(keypoints, radius):
+    result = []
+    for point in keypoints:
+        if (not has_close_points(point, result, radius)):
+            result += [point]
+
+    return result
+
+
 class BallDetector:
 
     def __init__(self, yellowLowTres, yellowHighTres, pinkLowTres, pinkHighTres, ballSizeRange=(15, 30), debug=False):
@@ -15,27 +33,62 @@ class BallDetector:
         self.pinkHighTres = pinkHighTres
         self.ballSizeRange = ballSizeRange
         self.debug = debug
+        self.fast = cv2.FastFeatureDetector_create()
         if debug:
             self.create_debug_windows()
             self.create_trackbars()
-            
+
+    def detect_blobs(self,img, value):
+        kps = self.fast.detect(img,None)
+        kps =  merge_keypoints(kps,30)
+        return [ kp.pt for kp in kps]
 
     def detect_balls(self, img):
         yellow_mask = self.maskFrame(img, self.yellowLowTres, self.yellowHighTres)
-        yellow = self.hough_detect_balls(yellow_mask, 1)
-
+        yellow_kps = self.detect_blobs(yellow_mask,1)
+        yellow = self.detect_balls_in_keypoints(yellow_mask,yellow_kps,1,50)
+        #yellow = self.hough_detect_balls(yellow_mask, 1)
+        
         pink_mask = self.maskFrame(img, self.pinkLowTres, self.pinkHighTres)
-        pink = self.hough_detect_balls(pink_mask, -1)
+        pink_kps = self.detect_blobs(pink_mask, -1)
+        pink = self.detect_balls_in_keypoints(pink_mask,pink_kps,-1,50)
+        #pink = self.hough_detect_balls(pink_mask, -1)
 
         balls = [*yellow, *pink]
+        #balls = pink
         if self.debug:
             self.debug_update(img,yellow_mask,pink_mask, balls)
+        
         return balls
+    
+    def detect_balls_in_keypoints(self,img, kps, value, side):
+        half = side/2
+        ret = []
+        for kp in kps:
+            x = kp[0]
+            y = kp[1]
+            x1 = int(x-half)
+            x2 = int(x+half)
+            y1 = int(y-half)
+            y2 = int(y+half)
+            area = img[y1:y2,x1:x2]
+            balls = self.hough_detect_balls(area, value)
+            if balls:
+                ball = balls[0]
+                w_x = ball[0]+x1
+                w_y = ball[1]+y1
+                r = ball[2]
+                v = value
+                ret.append((w_x,w_y,r,v))
+        return ret
 
     def hough_detect_balls(self, img, value):
         #cv2.imshow("masked"+str(value), img)
+        if img.shape[0] == 0 or img.shape[1] == 0:
+            return []
+        print(img.shape)
         circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1,
-                                   img.shape[0]/64, param1=200, param2=10, minRadius=self.ballSizeRange[0], maxRadius=self.ballSizeRange[1])
+                                   img.shape[0]/64, param1=100, param2=8, minRadius=self.ballSizeRange[0], maxRadius=self.ballSizeRange[1])
         if circles is None:
             print("No circles found")
             return []
@@ -54,9 +107,9 @@ class BallDetector:
         similar hue, saturation, and value levels as the objects to be detected
         """
         # Blur the image to reduce high frequency noise
-        #frame = cv2.GaussianBlur(frame,(7,7),0);
+        mask = cv2.GaussianBlur(frame,(3,3),0);
         
-        mask = cv2.medianBlur(frame, 3)
+        #mask = cv2.medianBlur(frame, 3)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
         
