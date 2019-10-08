@@ -10,25 +10,26 @@ def main():
 
 	ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
 	if not ser.isOpen():
+		print("cant open serial")
 		return
-		#print("cant open serial")
-		#return
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	'''s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect(('192.168.43.42',50001))
 	message = "BEEP!"
 	while 1:
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
-		#print(data)
+		print(data)
 		split_data = data.split('#')
-		#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
+		print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
 		r_com = str(split_data[0])
 		l_com = str(split_data[1])
-        	data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
-		#if not ser.isOpen():
-			#print("serial not ok")
+        	data = 'R0L0'
+		if not ser.isOpen():
+			print("serial not ok")
 	        ser.write(data)
-
+	'''
+	data = 'R0L0'
+	ser.write(data)
 
 
 if __name__=='__main__':
