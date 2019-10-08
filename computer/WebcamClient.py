@@ -25,19 +25,19 @@ yellow_high = np.array([35, 255, 255])
 pink_low = np.array([150, 50, 160])
 pink_high = np.array([175, 255, 255])
 
-radius_range = [13, 25]
+radius_range = [5, 25]
 
 url = "udp://224.0.0.0:1234"
 # print(cv2.getBuildInformation())
 
 
 def main():
-    # SI = socketInterface()
+    SI = socketInterface()
 
     print("Connecting to camera")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture('videos/Balls2.ts')
+    cap = cv2.VideoCapture(1)
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
@@ -67,9 +67,8 @@ def main():
 
 
 
-                '''
-                for i in ids:
-                    print("id: ", str(i))
+                #for i in ids:
+                    #print("id: ", str(i))
                 robot_pose = (0.0, 0.0, 0.0)
                 for pos in positions:
 
@@ -94,8 +93,8 @@ def main():
                     if ball_found:
                         r_com, l_com = drive_commands(
                             ball_x, ball_y, robot_x, robot_y, robot_yaw)
-                        r_com = 255*r_com
-                        l_com = 255*l_com
+                        r_com = 150*r_com #255*r_com
+                        l_com = 150*l_com #255*l_com
 
                         if abs(r_com) < brakezone:
                             r_com = 0
@@ -114,11 +113,11 @@ def main():
 
                     # ohjauskomento sokettiin
                     SI.send_command(r_com, l_com)
-                    '''
             time2 = time.time()
             frame_time = (time2-time1)*1000
-            fps = 1000/frame_time
-            print("Frame_time:",frame_time, 'ms','fps:', fps)
+            if frame_time != 0:
+                fps = 1000/frame_time
+                print("Frame_time:",frame_time, 'ms','fps:', fps)
     except:
         raise
     finally:
