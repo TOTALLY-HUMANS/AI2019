@@ -40,16 +40,22 @@ class RobotState(Enum):
     Idle = 0
     ChaseClosestRedBall = 1
     ChaseClosestGreenBall = 2
+robot_1_id = 15
+robot_2_id = 16
 robot_1_state = RobotState.ChaseClosestGreenBall
 robot_2_state = RobotState.ChaseClosestRedBall
+own_goal_id = 10
+own_goal_pose = None
+opponent_goal_id = 11
+opponent_goal_pose = None
 
 # Sentti on tämän verran pikseleitä
 centimeter = 10
 
 # MAIN LOOPERO
 def main():
-    SI15 = socketInterface()
-    SI16 = socketInterface()
+    SI1 = socketInterface()
+    SI2 = socketInterface()
 
     print("Connecting to camera")
     #cap = AvVideoCapture(url)
@@ -144,19 +150,26 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
-    for pos in positions:
+    for pos in robot_positions:
         if pos[3] == robot:
             robot_pose = pos
             pose_found = True
+        if pos[3] == own_goal_id and own_goal_pose == None:
+            own_goal_pose = pos
+        if pos[3] == opponent_goal_id and opponent_goal_pose == None:
+            opponent_goal_pose = pos
+    if opponent_goal_pose == None or own_goal_pose == None:
+        print("Doing nothing, no goals detected")
+        return
     if not pose_found:
         print("No robot found, idling")
         updateState(robot, RobotState.Idle)
-    robotStates[currentRobotState](robot, tracked, robot_pose)
+    robotStates[currentRobotState](robot, ball_positions, robot_pose)
 
 def updateState(robot, newState):
-    if robot == 15:
+    if robot == robot_1_id:
         robot_1_state = newState
-    if robot == 16:
+    if robot == robot_2_id:
         robot_2_state = newState
 
 # STATES
@@ -240,10 +253,10 @@ def moveTowardsTarget(robot, ball_pose, robot_pose):
             l_com = l_com + deadzone
 
     # ohjauskomento sokettiin
-    if robot == 15:
-        SI15.send_command(r_com, l_com)
-    if robot == 16:
-        SI16.send_command(r_com, l_com)
+    if robot == robot_1_id:
+        SI1.send_command(r_com, l_com)
+    if robot == robot_2_id:
+        SI2.send_command(r_com, l_com)
 
 if __name__ == "__main__":
     main()
