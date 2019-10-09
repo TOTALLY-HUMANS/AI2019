@@ -8,11 +8,16 @@ import av
 import numpy as np
 from cv2 import aruco
 
+from scipy.spatial import distance
+
+from enum import Enum
+
 from av_video_capture import AvVideoCapture
 from video_capture import VideoCapture
 
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
+from euclidian_tracker import EuclidianTracker
 
 from my_robot import drive_commands
 from socket_interface import socketInterface
@@ -25,22 +30,42 @@ yellow_high = np.array([35, 255, 255])
 pink_low = np.array([150, 50, 160])
 pink_high = np.array([175, 255, 255])
 
-radius_range = [5, 25]
+radius_range = [13, 16]
 
 url = "udp://224.0.0.0:1234"
 # print(cv2.getBuildInformation())
 
 
+# Sentti on tämän verran pikseleitä
+centimeter = 10
+
+# ROBOT STATE DEFINITIONS
+class RobotState(Enum):
+    Idle = 0
+    ChaseClosestRedBall = 1
+    ChaseClosestGreenBall = 2
+robot_1_id = 15
+robot_2_id = 16
+robot_1_state = RobotState.ChaseClosestGreenBall
+robot_2_state = RobotState.ChaseClosestRedBall
+own_goal_pose = (0, 0)
+opponent_goal_pose = (1080, 1080)
+ROBOT_SIZE = 100
+
+# MAIN LOOPERO
 def main():
-    SI = socketInterface()
+    SI1 = socketInterface()
+    SI2 = socketInterface()
 
     print("Connecting to camera")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture('videos/Balls2.ts')
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
+    print("Initalizing tracker.")
+    tracker = EuclidianTracker(10)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
     try:
@@ -48,76 +73,31 @@ def main():
         while 1:
             time1 = time.time()
             ret, img = cap.read()
-           
-            #cv2.imshow('test', img)
-            #key = cv2.waitKey(1)
 
             if ret:
 
                 
-                #img = downscale_image(img, 90)
+                img = downscale_image(img, 90)
 
-                # img = downscale_image(img,80)
                 balls = ball_detector.detect_balls(img)
+                tracked = tracker.update(balls)
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
+                
+                visualize_detected(img, tracked, corners, ids, positions)
+                
+            
 
-                visualize_detected(img, balls, corners, ids, positions)
+                # Run robot AI
+                evaluateRobotState(15, tracked, positions)
+                evaluateRobotState(16, tracked, positions)
 
-
-
-                #for i in ids:
-                    #print("id: ", str(i))
-                robot_pose = (0.0, 0.0, 0.0)
-                for pos in positions:
-
-                    if pos[3] == 16:
-                        robot_pose = pos
-                    ball_found = False
-                    if len(balls) > 0:
-                        ball_pose = balls[0]
-                        ball_x = ball_pose[0]
-                        ball_y = ball_pose[1]
-                        ball_found = True
-
-                    robot_x = robot_pose[0]
-                    robot_y = robot_pose[1]
-                    robot_yaw = robot_pose[2]
-
-                    # ohjauskomento
-                    r_com = 0.0
-                    l_com = 0.0
-                    deadzone = 90
-                    brakezone = 50
-                    if ball_found:
-                        r_com, l_com = drive_commands(
-                            ball_x, ball_y, robot_x, robot_y, robot_yaw)
-                        r_com = 150*r_com #255*r_com
-                        l_com = 150*l_com #255*l_com
-
-                        if abs(r_com) < brakezone:
-                            r_com = 0
-                        elif abs(r_com) < deadzone:
-                            if r_com < 0:
-                                r_com = r_com - deadzone
-                            if r_com > 0:
-                                r_com = r_com + deadzone
-                        if abs(l_com) < brakezone:
-                            l_com = 0
-                        elif abs(l_com) < deadzone:
-                            if l_com < 0:
-                                l_com = l_com - deadzone
-                            if r_com > 0:
-                                l_com = l_com + deadzone
-
-                    # ohjauskomento sokettiin
-                    SI.send_command(r_com, l_com)
             time2 = time.time()
             frame_time = (time2-time1)*1000
             if frame_time != 0:
-                fps = 1000/frame_time
-                print("Frame_time:",frame_time, 'ms','fps:', fps)
+              fps = 1000/frame_time
+            print("Frame_time:",frame_time, 'ms','fps:', fps)
     except:
         raise
     finally:
@@ -133,13 +113,17 @@ def downscale_image(img, scale_percent):
 
 
 def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
-    for ball in balls:
-        x, y, r, v = ball
+    for key,val in balls.items():
+        x, y, r, v = val
         color = (127, 0, 255)
         if v == 1:
             color = (0, 179, 255)
         cv2.circle(img, (x, y), 2, color, 2)
         cv2.circle(img, (x, y), r, color, 2)
+        coordinates = coordinatesForRobotBehindBall(val)
+        cv2.circle(img, (int(coordinates[0]), int(coordinates[1])) , 2, (255, 0, 0), 2)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img, str(key), (x,y), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
     aruco.drawDetectedMarkers(img, aruco_corners, aruco_ids)
     for p in positions:
         x, z, theta, id = p
@@ -154,6 +138,143 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
     cv2.imshow('Detected', img)
     key = cv2.waitKey(1)
 
+### HERE BEGINS ROBOT AI ###
+
+def evaluateRobotState(robot, ball_positions, robot_positions):
+    if robot == 15:
+        currentRobotState = robot_1_state
+    if robot == 16:
+        currentRobotState = robot_2_state
+    robotStates = {
+        0: Idle,
+        1: ChaseClosestRedBall,
+        2: ChaseClosestGreenBall,
+    }
+    robot_pose = (0.0, 0.0, 0.0)
+    pose_found = False
+    for pos in robot_positions:
+        if pos[3] == robot:
+            robot_pose = pos
+            pose_found = True
+    if not pose_found:
+        print("No robot found, idling")
+        updateState(robot, RobotState.Idle)
+    robotStates[currentRobotState](robot, ball_positions, robot_pose)
+
+def updateState(robot, newState):
+    if robot == robot_1_id:
+        robot_1_state = newState
+    if robot == robot_2_id:
+        robot_2_state = newState
+
+# STATES
+
+def Idle(robot, tracked, robot_pose):
+    print("Idling")
+    updateState(robot, RobotState.ChaseClosestRedBall)
+
+def ChaseClosestRedBall(robot, tracked, robot_pose):
+    print("Chasing red balls...")
+    if len(tracked) == 0:
+        print("No balls found, idling")
+        updateState(robot, RobotState.Idle)
+        return
+    target = getClosestBall(tracked, robot_pose, -1)
+    moveTowardsTarget(robot, target, robot_pose)
+    if isNearTarget(robot_pose, target):
+        updateState(robot, RobotState.PrepareToHitRedBall)
+
+def ChaseClosestGreenBall(robot, tracked, robot_pose):
+    print("Chasing green balls...")
+    if len(tracked) == 0:
+        print("No balls found, idling")
+        updateState(robot, RobotState.Idle)
+        return
+    target = getClosestBall(tracked, robot_pose, 1)
+    moveTowardsTarget(robot, target, robot_pose)
+    if isNearTarget(robot_pose, target):
+        updateState(robot, RobotState.PrepareToHitGreenBall)
+
+# HELPER METHODS
+
+"""
+Return coordinates behind the ball based on the color of the ball and the position of the goal
+
+Input: 
+    a ball (x, y, ballType)
+"""
+def coordinatesForRobotBehindBall(ball):
+    x = ball[0]
+    y = ball[1]
+
+    goal_pose = None
+    if (ball[3] == 1):
+        goal_pose = opponent_goal_pose
+    elif (ball[3] == -1):
+        goal_pose = own_goal_pose
+
+    vector_to_goal = np.array([goal_pose[0] - x, goal_pose[1] - y])
+    vector_magnitude = np.linalg.norm(vector_to_goal)
+    position_behind_ball = np.array([x, y]) - (vector_to_goal/vector_magnitude) * ROBOT_SIZE
+    
+    return position_behind_ball
+
+
+def isNearTarget(robot_pose, target):
+    dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
+    if dist < centimeter * 10:
+        return True
+    return False
+
+def getClosestBall(tracked, robot_pose, ballType):
+    chosenBall = tracked[0]
+    shortestDistance = 100000
+    for ball in tracked.values():
+        if (ball[3] == ballType):
+            dist = distance.euclidean((ball[0], ball[1]), (robot_pose[0], robot_pose[1]))
+            if (dist < shortestDistance):
+                shortestDistance = dist
+                chosenBall = ball
+    return chosenBall
+
+def moveTowardsTarget(robot, ball_pose, robot_pose):
+    ball_x = ball_pose[0]
+    ball_y = ball_pose[1]
+    robot_x = robot_pose[0]
+    robot_y = robot_pose[1]
+    robot_yaw = robot_pose[2]
+
+    # ohjauskomento
+    r_com = 0.0
+    l_com = 0.0
+    deadzone = 90
+    brakezone = 50
+
+    r_com, l_com = drive_commands(
+        ball_x, ball_y, robot_x, robot_y, robot_yaw)
+    r_com = 150*r_com #255*r_com
+    l_com = 150*l_com #255*l_com
+
+    if abs(r_com) < brakezone:
+        r_com = 0
+    elif abs(r_com) < deadzone:
+        if r_com < 0:
+            r_com = r_com - deadzone
+        if r_com > 0:
+            r_com = r_com + deadzone
+    if abs(l_com) < brakezone:
+        l_com = 0
+    elif abs(l_com) < deadzone:
+        if l_com < 0:
+            l_com = l_com - deadzone
+        if r_com > 0:
+            l_com = l_com + deadzone
+
+    # ohjauskomento sokettiin
+    if robot == robot_1_id:
+        SI1.send_command(r_com, l_com)
+    if robot == robot_2_id:
+        SI2.send_command(r_com, l_com)
 
 if __name__ == "__main__":
     main()
