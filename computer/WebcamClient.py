@@ -167,7 +167,8 @@ def ChaseClosestRedBall(robot, tracked, positions, socket):
             robot_pose = pos
             pose_found = True
     if not pose_found:
-        print("No ball found")
+        print("No ball found, idling")
+        updateState(robot, RobotState.Idle)
         return
 
     ball_found = False
