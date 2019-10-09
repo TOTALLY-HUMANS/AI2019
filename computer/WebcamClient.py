@@ -43,6 +43,9 @@ class RobotState(Enum):
 robot_1_state = RobotState.ChaseClosestGreenBall
 robot_2_state = RobotState.ChaseClosestRedBall
 
+# Sentti on tämän verran pikseleitä
+centimeter = 10
+
 # MAIN LOOPERO
 def main():
     SI15 = socketInterface()
@@ -188,7 +191,7 @@ def ChaseClosestGreenBall(robot, tracked, robot_pose):
 
 def isNearTarget(robot_pose, target):
     dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
-    if dist < 5:
+    if dist < centimeter * 10:
         return True
     return False
 
