@@ -146,7 +146,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         1: ChaseClosestRedBall,
         2: ChaseClosestGreenBall,
     }
-    robotStates[currentRobotState](robot, tracked, positions, socket)
+    robotStates[currentRobotState](robot, tracked, positions, currentRobotSocket)
 
 def updateState(robot, newState):
     if robot == 15:
