@@ -48,9 +48,7 @@ robot_1_id = 15
 robot_2_id = 16
 robot_1_state = RobotState.ChaseClosestGreenBall
 robot_2_state = RobotState.ChaseClosestRedBall
-own_goal_id = 10
 own_goal_pose = (centimeter * 10, centimeter * 10)
-opponent_goal_id = 11
 opponent_goal_pose = (centimeter * 500, centimeter * 500)
 
 # MAIN LOOPERO
