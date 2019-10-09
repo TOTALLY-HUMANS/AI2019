@@ -137,29 +137,13 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 def evaluateRobotState(robot, ball_positions, robot_positions):
     if robot == 15:
         currentRobotState = robot_1_state
-        currentRobotSocket = SI15
     if robot == 16:
         currentRobotState = robot_2_state
-        currentRobotSocket = SI16
     robotStates = {
         0: Idle,
         1: ChaseClosestRedBall,
         2: ChaseClosestGreenBall,
     }
-    robotStates[currentRobotState](robot, tracked, positions, currentRobotSocket)
-
-def updateState(robot, newState):
-    if robot == 15:
-        robot_1_state = newState
-    if robot == 16:
-        robot_2_state = newState
-
-def Idle(robot, tracked, positions, socket):
-    print("Idling")
-    updateState(robot, RobotState.ChaseClosestGreenBall)
-
-def ChaseClosestRedBall(robot, tracked, positions, socket):
-    print("Chasing red balls...")
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
     for pos in positions:
@@ -167,17 +151,34 @@ def ChaseClosestRedBall(robot, tracked, positions, socket):
             robot_pose = pos
             pose_found = True
     if not pose_found:
-        print("No ball found, idling")
+        print("No robot found, idling")
+        updateState(robot, RobotState.Idle)
+    robotStates[currentRobotState](robot, tracked, robot_pose)
+
+def updateState(robot, newState):
+    if robot == 15:
+        robot_1_state = newState
+    if robot == 16:
+        robot_2_state = newState
+
+def Idle(robot, tracked, robot_pose):
+    print("Idling")
+    updateState(robot, RobotState.ChaseClosestRedBall)
+
+def ChaseClosestRedBall(robot, tracked, robot_pose):
+    print("Chasing red balls...")
+    if len(tracked) == 0:
+        print("No balls found, idling")
         updateState(robot, RobotState.Idle)
         return
+    moveTowardsTarget(robot, tracked[0], robot_pose)
 
-    ball_found = False
-    if len(tracked) > 0:
-        ball_pose = tracked[0]
-        ball_x = ball_pose[0]
-        ball_y = ball_pose[1]
-        ball_found = True
+def ChaseClosestGreenBall(robot, tracked, robot_pose):
+    print("Chasing green balls...")
 
+def moveTowardsTarget(robot, ball_pose, robot_pose):
+    ball_x = ball_pose[0]
+    ball_y = ball_pose[1]
     robot_x = robot_pose[0]
     robot_y = robot_pose[1]
     robot_yaw = robot_pose[2]
@@ -187,33 +188,32 @@ def ChaseClosestRedBall(robot, tracked, positions, socket):
     l_com = 0.0
     deadzone = 90
     brakezone = 50
-    if ball_found:
-        r_com, l_com = drive_commands(
-            ball_x, ball_y, robot_x, robot_y, robot_yaw)
-        r_com = 150*r_com #255*r_com
-        l_com = 150*l_com #255*l_com
 
-        if abs(r_com) < brakezone:
-            r_com = 0
-        elif abs(r_com) < deadzone:
-            if r_com < 0:
-                r_com = r_com - deadzone
-            if r_com > 0:
-                r_com = r_com + deadzone
-        if abs(l_com) < brakezone:
-            l_com = 0
-        elif abs(l_com) < deadzone:
-            if l_com < 0:
-                l_com = l_com - deadzone
-            if r_com > 0:
-                l_com = l_com + deadzone
+    r_com, l_com = drive_commands(
+        ball_x, ball_y, robot_x, robot_y, robot_yaw)
+    r_com = 150*r_com #255*r_com
+    l_com = 150*l_com #255*l_com
+
+    if abs(r_com) < brakezone:
+        r_com = 0
+    elif abs(r_com) < deadzone:
+        if r_com < 0:
+            r_com = r_com - deadzone
+        if r_com > 0:
+            r_com = r_com + deadzone
+    if abs(l_com) < brakezone:
+        l_com = 0
+    elif abs(l_com) < deadzone:
+        if l_com < 0:
+            l_com = l_com - deadzone
+        if r_com > 0:
+            l_com = l_com + deadzone
 
     # ohjauskomento sokettiin
-    socket.send_command(r_com, l_com)
-
-def ChaseClosestGreenBall(robot, tracked, positions, socket):
-    print("Chasing green balls...")
-
+    if robot == 15:
+        SI15.send_command(r_com, l_com)
+    if robot == 16:
+        SI16.send_command(r_com, l_com)
 
 if __name__ == "__main__":
     main()
