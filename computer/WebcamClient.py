@@ -35,6 +35,10 @@ radius_range = [13, 16]
 url = "udp://224.0.0.0:1234"
 # print(cv2.getBuildInformation())
 
+
+# Sentti on tämän verran pikseleitä
+centimeter = 10
+
 # ROBOT STATE DEFINITIONS
 class RobotState(Enum):
     Idle = 0
@@ -45,12 +49,9 @@ robot_2_id = 16
 robot_1_state = RobotState.ChaseClosestGreenBall
 robot_2_state = RobotState.ChaseClosestRedBall
 own_goal_id = 10
-own_goal_pose = None
+own_goal_pose = (centimeter * 10, centimeter * 10)
 opponent_goal_id = 11
-opponent_goal_pose = None
-
-# Sentti on tämän verran pikseleitä
-centimeter = 10
+opponent_goal_pose = (centimeter * 500, centimeter * 500)
 
 # MAIN LOOPERO
 def main():
@@ -154,13 +155,6 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         if pos[3] == robot:
             robot_pose = pos
             pose_found = True
-        if pos[3] == own_goal_id and own_goal_pose == None:
-            own_goal_pose = pos
-        if pos[3] == opponent_goal_id and opponent_goal_pose == None:
-            opponent_goal_pose = pos
-    if opponent_goal_pose == None or own_goal_pose == None:
-        print("Doing nothing, no goals detected")
-        return
     if not pose_found:
         print("No robot found, idling")
         updateState(robot, RobotState.Idle)
