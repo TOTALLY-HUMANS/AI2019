@@ -48,8 +48,9 @@ robot_1_id = 15
 robot_2_id = 16
 robot_1_state = RobotState.ChaseClosestGreenBall
 robot_2_state = RobotState.ChaseClosestRedBall
-own_goal_pose = (centimeter * 0, centimeter * 0)
-opponent_goal_pose = (centimeter * 500, centimeter * 500)
+own_goal_pose = (0, 0)
+opponent_goal_pose = (1080, 1080)
+ROBOT_SIZE = 100
 
 # MAIN LOOPERO
 def main():
@@ -119,6 +120,8 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
             color = (0, 179, 255)
         cv2.circle(img, (x, y), 2, color, 2)
         cv2.circle(img, (x, y), r, color, 2)
+        coordinates = coordinatesForRobotBehindBall(val)
+        cv2.circle(img, (int(coordinates[0]), int(coordinates[1])) , 2, (255, 0, 0), 2)
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(img, str(key), (x,y), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
     aruco.drawDetectedMarkers(img, aruco_corners, aruco_ids)
@@ -193,6 +196,29 @@ def ChaseClosestGreenBall(robot, tracked, robot_pose):
         updateState(robot, RobotState.PrepareToHitGreenBall)
 
 # HELPER METHODS
+
+"""
+Return coordinates behind the ball based on the color of the ball and the position of the goal
+
+Input: 
+    a ball (x, y, ballType)
+"""
+def coordinatesForRobotBehindBall(ball):
+    x = ball[0]
+    y = ball[1]
+
+    goal_pose = None
+    if (ball[3] == 1):
+        goal_pose = opponent_goal_pose
+    elif (ball[3] == -1):
+        goal_pose = own_goal_pose
+
+    vector_to_goal = np.array([goal_pose[0] - x, goal_pose[1] - y])
+    vector_magnitude = np.linalg.norm(vector_to_goal)
+    position_behind_ball = np.array([x, y]) - (vector_to_goal/vector_magnitude) * ROBOT_SIZE
+    
+    return position_behind_ball
+
 
 def isNearTarget(robot_pose, target):
     dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
