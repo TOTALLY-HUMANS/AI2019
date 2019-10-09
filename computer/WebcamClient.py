@@ -13,6 +13,7 @@ from video_capture import VideoCapture
 
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
+from euclidian_tracker import EuclidianTracker
 
 from my_robot import drive_commands
 from socket_interface import socketInterface
@@ -25,22 +26,24 @@ yellow_high = np.array([35, 255, 255])
 pink_low = np.array([150, 50, 160])
 pink_high = np.array([175, 255, 255])
 
-radius_range = [5, 25]
+radius_range = [13, 16]
 
 url = "udp://224.0.0.0:1234"
 # print(cv2.getBuildInformation())
 
 
 def main():
-    SI = socketInterface()
+    #SI = socketInterface()
 
     print("Connecting to camera")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture('videos/Balls1.ts')
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
+    print("Initalizing tracker.")
+    tracker = EuclidianTracker(2000)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
     try:
@@ -55,15 +58,25 @@ def main():
             if ret:
 
                 
-                #img = downscale_image(img, 90)
+                img = downscale_image(img, 90)
 
                 # img = downscale_image(img,80)
                 balls = ball_detector.detect_balls(img)
+                balls = [b for b in balls if b[3]==1]
+                print(len(balls))
+                tracked = tracker.update(balls)
+                print(tracked)
+
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
+                if len(tracked) >= 3:
+                    visualize_detected(img, tracked, corners, ids, positions)
+                    cv2.imwrite('wtf.jpg',img)
+                    break
 
-                visualize_detected(img, balls, corners, ids, positions)
+                
+                '''
 
 
 
@@ -113,11 +126,12 @@ def main():
 
                     # ohjauskomento sokettiin
                     SI.send_command(r_com, l_com)
+                    '''
             time2 = time.time()
             frame_time = (time2-time1)*1000
             if frame_time != 0:
-                fps = 1000/frame_time
-                print("Frame_time:",frame_time, 'ms','fps:', fps)
+              fps = 1000/frame_time
+            print("Frame_time:",frame_time, 'ms','fps:', fps)
     except:
         raise
     finally:
@@ -133,13 +147,15 @@ def downscale_image(img, scale_percent):
 
 
 def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
-    for ball in balls:
-        x, y, r, v = ball
+    for key,val in balls.items():
+        x, y, r, v = val
         color = (127, 0, 255)
         if v == 1:
             color = (0, 179, 255)
         cv2.circle(img, (x, y), 2, color, 2)
         cv2.circle(img, (x, y), r, color, 2)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img, str(key), (x,y), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
     aruco.drawDetectedMarkers(img, aruco_corners, aruco_ids)
     for p in positions:
         x, z, theta, id = p
