@@ -43,15 +43,14 @@ class EuclidianTracker():
             D = dist.cdist(objectCentroids, inputCentroids)
             rows = D.min(axis=1).argsort()
             cols = D.argmin(axis=1)[rows]
-            print(D)
 
             usedRows = set()
             usedCols = set()
 
-            for(row, col) in zip(rows, cols):
+            for row, col in zip(rows, cols):
                 if row in usedRows or col in usedCols:
                     continue
-
+                
                 objectID = objectIDs[row]
                 self.objects[objectID] = balls[col]
                 self.disappeared[objectID] = 0
@@ -62,14 +61,13 @@ class EuclidianTracker():
                 unusedRows = set(range(0, D.shape[0])).difference(usedRows)
                 unusedCols = set(range(0, D.shape[1])).difference(usedCols)
 
-                if D.shape[0] >= D.shape[1]:
-                    for row in unusedRows:
-                        objectID = objectIDs[row]
-                        if objectID in self.disappeared.keys():
-                            self.disappeared[objectID] += 1
-                            if self.disappeared[objectID] > self.maxDisappeared:
-                                self.deregister(objectID)
-                else:
-                    for col in unusedCols:
-                        self.register(balls[col])
+            if D.shape[0] >= D.shape[1]:
+                for row in unusedRows:
+                    objectID = objectIDs[row]
+                    self.disappeared[objectID] += 1
+                    if self.disappeared[objectID] > self.maxDisappeared:
+                        self.deregister(objectID)
+            else:
+                for col in unusedCols:
+                    self.register(balls[col])
         return self.objects

@@ -38,12 +38,12 @@ def main():
     print("Connecting to camera")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture('videos/Balls1.ts')
+    cap = cv2.VideoCapture('videos/Balls2.ts')
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
     print("Initalizing tracker.")
-    tracker = EuclidianTracker(2000)
+    tracker = EuclidianTracker(10)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
     try:
@@ -51,29 +51,22 @@ def main():
         while 1:
             time1 = time.time()
             ret, img = cap.read()
-           
-            #cv2.imshow('test', img)
-            #key = cv2.waitKey(1)
 
             if ret:
 
                 
                 img = downscale_image(img, 90)
 
-                # img = downscale_image(img,80)
                 balls = ball_detector.detect_balls(img)
-                balls = [b for b in balls if b[3]==1]
-                print(len(balls))
                 tracked = tracker.update(balls)
-                print(tracked)
 
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
-                if len(tracked) >= 3:
-                    visualize_detected(img, tracked, corners, ids, positions)
-                    cv2.imwrite('wtf.jpg',img)
-                    break
+                
+                visualize_detected(img, tracked, corners, ids, positions)
+                
+            
 
                 
                 '''
