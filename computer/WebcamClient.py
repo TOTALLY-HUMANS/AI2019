@@ -8,6 +8,8 @@ import av
 import numpy as np
 from cv2 import aruco
 
+from scipy.spatial import distance
+
 from enum import Enum
 
 from av_video_capture import AvVideoCapture
@@ -154,6 +156,8 @@ def updateState(robot, newState):
     if robot == 16:
         robot_2_state = newState
 
+# STATES
+
 def Idle(robot, tracked, robot_pose):
     print("Idling")
     updateState(robot, RobotState.ChaseClosestRedBall)
@@ -164,10 +168,22 @@ def ChaseClosestRedBall(robot, tracked, robot_pose):
         print("No balls found, idling")
         updateState(robot, RobotState.Idle)
         return
-    moveTowardsTarget(robot, tracked[0], robot_pose)
+    moveTowardsTarget(robot, getClosestBall(tracked, robot_pose), robot_pose)
 
 def ChaseClosestGreenBall(robot, tracked, robot_pose):
     print("Chasing green balls...")
+
+# HELPER METHODS
+
+def getClosestBall(tracked, robot_pose):
+    chosenBall = tracked[0]
+    shortestDistance = 100000
+    for ball in tracked.values():
+        dist = distance.euclidean((ball[0], ball[1]), (robot_pose[0], robot_pose[1]))
+        if (dist < shortestDistance):
+            shortestDistance = dist
+            chosenBall = ball
+    return chosenBall
 
 def moveTowardsTarget(robot, ball_pose, robot_pose):
     ball_x = ball_pose[0]
