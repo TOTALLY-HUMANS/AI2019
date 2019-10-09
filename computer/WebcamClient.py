@@ -168,7 +168,10 @@ def ChaseClosestRedBall(robot, tracked, robot_pose):
         print("No balls found, idling")
         updateState(robot, RobotState.Idle)
         return
-    moveTowardsTarget(robot, getClosestBall(tracked, robot_pose, -1), robot_pose)
+    target = getClosestBall(tracked, robot_pose, -1)
+    moveTowardsTarget(robot, target, robot_pose)
+    if isNearTarget(robot_pose, target):
+        updateState(robot, RobotState.PrepareToHitRedBall)
 
 def ChaseClosestGreenBall(robot, tracked, robot_pose):
     print("Chasing green balls...")
@@ -176,9 +179,18 @@ def ChaseClosestGreenBall(robot, tracked, robot_pose):
         print("No balls found, idling")
         updateState(robot, RobotState.Idle)
         return
-    moveTowardsTarget(robot, getClosestBall(tracked, robot_pose, 1), robot_pose)
+    target = getClosestBall(tracked, robot_pose, 1)
+    moveTowardsTarget(robot, target, robot_pose)
+    if isNearTarget(robot_pose, target):
+        updateState(robot, RobotState.PrepareToHitGreenBall)
 
 # HELPER METHODS
+
+def isNearTarget(robot_pose, target):
+    dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
+    if dist < 5:
+        return True
+    return False
 
 def getClosestBall(tracked, robot_pose, ballType):
     chosenBall = tracked[0]
