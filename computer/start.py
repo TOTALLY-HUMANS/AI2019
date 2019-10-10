@@ -209,7 +209,7 @@ def ChaseTarget(robot, tracked, robot_pose):
         target = robot_2_target
     # Liikutaan pallon taakse
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
-    # Ollaan riittävän lähellä palloa, tähdätään siihen
+    # Jos ollaan riittävän lähellä palloa, tähdätään siihen
     if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
         updateState(robot, RobotState.PrepareToHitTarget)
 
