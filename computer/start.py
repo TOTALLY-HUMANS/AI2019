@@ -230,6 +230,11 @@ def HitTarget(robot, tracked, robot_pose):
     ramForward(robot)
     # Pallo karkasi, palataan idlaamaan (ja etsimään uutta kohdetta)
     if UltrasonicSensor.distance() > 30 * centimeter:
+        # Nollataan kohde
+        if robot == robot_1_id:
+            robot_1_target = None
+        if robot == robot_2_id:
+            robot_2_target = None
         updateState(robot, RobotState.Idle)
 
 # HELPER METHODS
