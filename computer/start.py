@@ -195,10 +195,13 @@ def FindTarget(robot, tracked, robot_pose):
         updateState(robot, RobotState.Idle)
         return
     if robot == robot_1_id: # Ykkösrobo jahtaa punaista
-        robot_1_target = getClosestBall(tracked, robot_pose, -1)
+        robot_1_target = target = getClosestBall(tracked, robot_pose, -1)
     if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
-        robot_2_target = getClosestBall(tracked, robot_pose, 1)
-    updateState(robot, RobotState.ChaseTarget) # Kohde löytyy, lähdetään perään
+        robot_2_target = target = getClosestBall(tracked, robot_pose, 1)
+    if target is not None:
+        updateState(robot, RobotState.ChaseTarget) # Kohde löytyy, lähdetään perään
+    else:
+        updateState(robot, RobotState.Idle) # Kohdetta ei löydy, idlataan
 
 # Ajetaan pallon tyypistä riippuen sen eteen tai taakse
 def ChaseTarget(robot, tracked, robot_pose):
@@ -266,7 +269,7 @@ def isNearTarget(robot_pose, target):
     return False
 
 def getClosestBall(tracked, robot_pose, ballType):
-    chosenBall = tracked[0]
+    chosenBall = None
     shortestDistance = 100000
     for ball in tracked.values():
         if (ball.color == ballType):
