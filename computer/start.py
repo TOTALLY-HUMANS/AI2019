@@ -221,7 +221,7 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
     target = getTarget(robot)
     rotateTowardsTarget(robot, target)
     # Jos ollaan riittävän lähellä, jyrätään päin 
-    if UltrasonicCapture.read() < 20 * centimeter:
+    if UltrasonicCapture.read() < 20 * centimeter and isNearTarget(robot_pose, target):
         updateState(robot, RobotState.HitTarget)
     
 # Jyrätään palloon
