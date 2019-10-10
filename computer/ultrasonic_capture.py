@@ -44,10 +44,10 @@ class UltrasonicCapture:
         pulse_duration = pulse_end_time - pulse_start_time
         distance = round(pulse_duration * 17150, 2)
         if not self.q.empty():
-        try:
-          self.q.get_nowait()   # discard previous (unprocessed) frame
-        except queue.Empty:
-          pass
+          try:
+            self.q.get_nowait()   # discard previous (unprocessed) frame
+          except queue.Empty:
+            pass
         self.q.put(distance)
       finally:
         GPIO.cleanup() 
