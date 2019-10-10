@@ -206,10 +206,7 @@ def FindTarget(robot, tracked, robot_pose):
 # Ajetaan pallon tyypistä riippuen sen eteen tai taakse
 def ChaseTarget(robot, tracked, robot_pose):
     print(robot + ": Chasing target...")
-    if robot == robot_1_id:
-        target = robot_1_target
-    if robot == robot_2_id:
-        target = robot_2_target
+    target = getTarget(robot)
     # Liikutaan pallon taakse
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
     # Jos ollaan riittävän lähellä palloa, tähdätään siihen
@@ -220,10 +217,7 @@ def ChaseTarget(robot, tracked, robot_pose):
 def PrepareToHitTarget(robot, tracked, robot_pose):
     print(robot + ": Preparing to hit target...")
     # Käännytään kohti palloa
-    if robot == robot_1_id:
-        target = robot_1_target
-    if robot == robot_2_id:
-        target = robot_2_target
+    target = getTarget(robot)
     rotateTowardsTarget(robot, target)
     # Jos ollaan riittävän lähellä, jyrätään päin 
     if UltrasonicSensor.distance() < 20 * centimeter:
@@ -239,6 +233,13 @@ def HitTarget(robot, tracked, robot_pose):
         updateState(robot, RobotState.Idle)
 
 # HELPER METHODS
+
+# Luetaan kohde
+def getTarget(robot):
+    if robot == robot_1_id:
+        return robot_1_target
+    if robot == robot_2_id:
+        return robot_2_target
 
 """
 Return coordinates behind the ball based on the color of the ball and the position of the goal
@@ -278,6 +279,8 @@ def getClosestBall(tracked, robot_pose, ballType):
                 shortestDistance = dist
                 chosenBall = ball
     return chosenBall
+
+# ROBOTIN LIIKKUMINEN
 
 def ramForward(robot):
     print("Nyt mennään")
