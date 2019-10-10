@@ -96,8 +96,6 @@ def main():
                 
                 visualize_detected(img, tracked_balls, corners, ids, positions)
                 
-            
-
                 # Run robot AI
                 #evaluateRobotState(15, tracked_balls, positions)
                 #evaluateRobotState(16, tracked_balls, positions)
@@ -151,6 +149,7 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 
 ### HERE BEGINS ROBOT AI ###
 
+# Evaluoi robotin tilaa, pyörittää tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
     if robot == 15:
         currentRobotState = robot_1_state
@@ -174,6 +173,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         updateState(robot, RobotState.Idle)
     robotStates[currentRobotState](robot, ball_positions, robot_pose)
 
+# Vaihdetaan tilakoneen tilaa
 def updateState(robot, newState):
     if robot == robot_1_id:
         robot_1_state = newState
