@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from scipy.spatial import distance as dist
 import numpy as np
-
+import time
 
 # Adapted from https://www.pyimagesearch.com/2018/07/23/simple-object-tracking-with-opencv/
 
@@ -13,6 +13,7 @@ class EuclidianTracker():
         self.disappeared = OrderedDict()
         # max frames to stay disappeared
         self.maxDisappeared = maxDisappeared
+        self.prev_time = time.time()
 
     def register(self, obj):
         self.objects[self.nextObjectID] = obj
@@ -24,6 +25,11 @@ class EuclidianTracker():
         del self.disappeared[objectID]
 
     def update(self, balls):
+        #Update timer
+        cur_time = time.time()
+        elapsed_time = cur_time - self.prev_time
+        self.prev_time = time.time()
+        #print(elapsed_time)
         # Update disappeared object frames
         if len(balls) == 0:
             for objectID in list(self.disappeared.keys()):
@@ -37,8 +43,8 @@ class EuclidianTracker():
                 self.register(balls[i])
         else:
             objectIDs = list(self.objects.keys())
-            objectCentroids = np.array([(obj[0], obj[1])for obj in self.objects.values()])
-            inputCentroids = np.array([(obj[0], obj[1]) for obj in balls])
+            objectCentroids = np.array([obj.center for obj in self.objects.values()])
+            inputCentroids = np.array([obj.center for obj in balls])
 
             D = dist.cdist(objectCentroids, inputCentroids)
             rows = D.min(axis=1).argsort()
@@ -52,7 +58,16 @@ class EuclidianTracker():
                     continue
                 
                 objectID = objectIDs[row]
-                self.objects[objectID] = balls[col]
+                new = balls[col]
+                old = self.objects[objectID]
+                #Calculate speed as px/s
+                moved_v = np.array(new.center) - np.array(old.center)
+                if  np.linalg.norm(moved_v) < 5:
+                    moved_v = np.array([0,0])
+                speed_v = tuple(np.true_divide(moved_v,elapsed_time))
+                new.speed = speed_v
+                
+                self.objects[objectID] = new
                 self.disappeared[objectID] = 0
 
                 usedRows.add(row)

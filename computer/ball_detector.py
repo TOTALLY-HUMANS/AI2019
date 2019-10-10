@@ -3,6 +3,8 @@ import math
 import cv2
 import numpy as np
 
+from ball import Ball,Color
+
 def nothing(x):
     return
 
@@ -45,12 +47,12 @@ class BallDetector:
 
     def detect_balls(self, img):
         yellow_mask = self.maskFrame(img, self.yellowLowTres, self.yellowHighTres)
-        yellow_kps = self.detect_blobs(yellow_mask,1)
+        yellow_kps = self.detect_blobs(yellow_mask,Color.YELLOW)
         yellow = self.detect_balls_in_keypoints(yellow_mask,yellow_kps,1,50)
         #yellow = self.hough_detect_balls(yellow_mask, 1)
         
         pink_mask = self.maskFrame(img, self.pinkLowTres, self.pinkHighTres)
-        pink_kps = self.detect_blobs(pink_mask, -1)
+        pink_kps = self.detect_blobs(pink_mask, Color.PINK)
         pink = self.detect_balls_in_keypoints(pink_mask,pink_kps,-1,50)
         #pink = self.hough_detect_balls(pink_mask, -1)
 
@@ -64,6 +66,7 @@ class BallDetector:
     def detect_balls_in_keypoints(self,img, kps, value, side):
         half = side/2
         ret = []
+        #Use keypoints to efficiently search for balls
         for kp in kps:
             x = kp[0]
             y = kp[1]
@@ -73,13 +76,14 @@ class BallDetector:
             y2 = int(y+half)
             area = img[y1:y2,x1:x2]
             balls = self.hough_detect_balls(area, value)
+            #Take only one ball from each keypoint
             if balls:
                 ball = balls[0]
                 w_x = ball[0]+x1
                 w_y = ball[1]+y1
                 r = ball[2]
-                v = value
-                ret.append((w_x,w_y,r,v))
+                ball_obj = Ball((w_x,w_y),r,(0,0),value)
+                ret.append(ball_obj)
         return ret
 
     def hough_detect_balls(self, img, value):
@@ -129,11 +133,10 @@ class BallDetector:
     
     def draw_debug(self,img, yellow_mask,pink_mask,balls):
         for ball in balls:
-            x, y, r, v = ball
             color = (127, 0, 255)
-            if v == 1:
+            if ball.color == Color.YELLOW:
                 color = (0, 179, 255)
-            cv2.circle(img, (x, y), r, color, 2)
+            cv2.circle(img, ball.centroid, ball.radius, color, 2)
         cv2.imshow('yellow', yellow_mask)
         cv2.imshow('pink', pink_mask)
         cv2.imshow('debug', img)

@@ -2,6 +2,7 @@
 import time
 import math
 import threading
+import json
 # import imutils
 import cv2
 import av
@@ -54,18 +55,21 @@ ROBOT_SIZE = 100
 
 # MAIN LOOPERO
 def main():
-    SI1 = socketInterface()
-    SI2 = socketInterface()
+    print("Loading configuration.")
+    #with open('config.json') as json_data:
+        #data = json.load(json_data_file)
+    #SI1 = socketInterface()
+    #SI2 = socketInterface()
 
-    print("Connecting to camera")
+    print("Connecting to camera.")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture('videos/Balls2.ts')
+    cap = cv2.VideoCapture('videos/Balls1.ts')
     print("Initializing ball detector.")
     ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
                                  pink_high, ballSizeRange=radius_range, debug=False)
-    print("Initalizing tracker.")
-    tracker = EuclidianTracker(10)
+    print("Initalizing ball tracker.")
+    ball_tracker = EuclidianTracker(10)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
     try:
@@ -80,18 +84,18 @@ def main():
                 img = downscale_image(img, 90)
 
                 balls = ball_detector.detect_balls(img)
-                tracked = tracker.update(balls)
+                tracked_balls = ball_tracker.update(balls)
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
                 
-                visualize_detected(img, tracked, corners, ids, positions)
+                visualize_detected(img, tracked_balls, corners, ids, positions)
                 
             
 
                 # Run robot AI
-                evaluateRobotState(15, tracked, positions)
-                evaluateRobotState(16, tracked, positions)
+                #evaluateRobotState(15, tracked_balls, positions)
+                #evaluateRobotState(16, tracked_balls, positions)
 
             time2 = time.time()
             frame_time = (time2-time1)*1000
@@ -114,16 +118,19 @@ def downscale_image(img, scale_percent):
 
 def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
     for key,val in balls.items():
-        x, y, r, v = val
         color = (127, 0, 255)
-        if v == 1:
+        if val.color == 1:
             color = (0, 179, 255)
-        cv2.circle(img, (x, y), 2, color, 2)
-        cv2.circle(img, (x, y), r, color, 2)
+        #Draw the centroid and a circle around the ball
+        cv2.circle(img, val.center, 2, color, 2)
+        cv2.circle(img, val.center, val.radius, color, 2)
+        #Draw a speed vector from the ball
+        speed = tuple(np.array(val.center)+np.array(val.speed))
+        cv2.line(img, val.center, (int(speed[0]),int(speed[1])),(0,0,255),2)
         coordinates = coordinatesForRobotBehindBall(val)
         cv2.circle(img, (int(coordinates[0]), int(coordinates[1])) , 2, (255, 0, 0), 2)
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(img, str(key), (x,y), font, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(img, str(key), val.center, font, 1, (0, 255, 0), 2, cv2.LINE_AA)
     aruco.drawDetectedMarkers(img, aruco_corners, aruco_ids)
     for p in positions:
         x, z, theta, id = p
@@ -204,13 +211,13 @@ Input:
     a ball (x, y, ballType)
 """
 def coordinatesForRobotBehindBall(ball):
-    x = ball[0]
-    y = ball[1]
+    x,y = ball.center
+    color = ball.color
 
     goal_pose = None
-    if (ball[3] == 1):
+    if (color == 1):
         goal_pose = opponent_goal_pose
-    elif (ball[3] == -1):
+    elif (color == -1):
         goal_pose = own_goal_pose
 
     vector_to_goal = np.array([goal_pose[0] - x, goal_pose[1] - y])
