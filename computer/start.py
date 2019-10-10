@@ -19,6 +19,7 @@ from video_capture import VideoCapture
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
 from euclidian_tracker import EuclidianTracker
+from ultrasonic_capture import UltrasonicCapture
 
 from my_robot import drive_commands
 from socket_interface import socketInterface
@@ -220,7 +221,7 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
     target = getTarget(robot)
     rotateTowardsTarget(robot, target)
     # Jos ollaan riittävän lähellä, jyrätään päin 
-    if UltrasonicSensor.distance() < 20 * centimeter:
+    if UltrasonicCapture.read() < 20 * centimeter:
         updateState(robot, RobotState.HitTarget)
     
 # Jyrätään palloon
@@ -229,7 +230,7 @@ def HitTarget(robot, tracked, robot_pose):
     # Ajetaan päin
     ramForward(robot)
     # Pallo karkasi, palataan idlaamaan (ja etsimään uutta kohdetta)
-    if UltrasonicSensor.distance() > 30 * centimeter:
+    if UltrasonicCapture.read() > 30 * centimeter:
         # Nollataan kohde
         if robot == robot_1_id:
             robot_1_target = None
