@@ -96,8 +96,8 @@ def main():
                 visualize_detected(img, tracked_balls, corners, ids, positions)
                 
                 # Run robot AI
-                evaluateRobotState(16, tracked_balls, positions)
-                #evaluateRobotState(17, tracked_balls, positions)
+                evaluateRobotState(robot_1_id, tracked_balls, positions)
+                #evaluateRobotState(robot_2_id, tracked_balls, positions)
 
             time2 = time.time()
             frame_time = (time2-time1)*1000
@@ -216,9 +216,9 @@ def HitTarget(robot, tracked, robot_pose):
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
     currentRobotState = RobotState.Idle
-    if robot == 16:
+    if robot == robot_1_id:
         currentRobotState = robot_1_state
-    if robot == 17:
+    if robot == robot_2_id:
         currentRobotState = robot_2_state
     robotStates = {
         0: Idle,
