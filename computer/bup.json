@@ -1,0 +1,11 @@
+{
+    "downscale_p":90,
+    "url":"udp://224.0.0.0:1234",
+    "ball_detector":{
+        "yellow_low":[25,50,160],
+        "yellow_high":[35,255,255],
+        "pink_low":[150,50,160],
+        "pink_high":[175,255,255],
+        "radius_range":[13,16]
+    }
+}
