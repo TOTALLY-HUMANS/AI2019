@@ -24,17 +24,20 @@ class UltrasonicCapture:
 
         GPIO.output(PIN_TRIGGER, GPIO.LOW)
 
-        print "Waiting for sensor to settle"
+        print("Waiting for sensor to settle")
 
         time.sleep(2)
 
-        print "Calculating distance"
+        print( "Calculating distance")
 
         GPIO.output(PIN_TRIGGER, GPIO.HIGH)
 
         time.sleep(0.00001)
 
         GPIO.output(PIN_TRIGGER, GPIO.LOW)
+      
+        pulse_start_time = 0
+        pulse_end_time = 0
 
         while GPIO.input(PIN_ECHO)==0:
               pulse_start_time = time.time()
