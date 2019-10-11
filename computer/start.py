@@ -33,7 +33,7 @@ pink_high = np.array([175, 255, 255])
 
 radius_range = [13, 16]
 
-url = "udp://224.0.0.0:1234"
+#url = "udp://224.0.0.0:1234"
 # print(cv2.getBuildInformation())
 
 
@@ -56,18 +56,17 @@ ROBOT_SIZE = 100
 # MAIN LOOPERO
 def main():
     print("Loading configuration.")
-    #with open('config.json') as json_data:
-        #data = json.load(json_data_file)
+    with open('config.json') as json_data:
+        config = json.load(json_data)
     #SI1 = socketInterface()
     #SI2 = socketInterface()
 
     print("Connecting to camera.")
-    #cap = AvVideoCapture(url)
+    #cap = AvVideoCapture(config["url"])
     #cap = VideoCapture(url)
     cap = cv2.VideoCapture('videos/Balls1.ts')
     print("Initializing ball detector.")
-    ball_detector = BallDetector(yellow_low, yellow_high, pink_low,
-                                 pink_high, ballSizeRange=radius_range, debug=False)
+    ball_detector = BallDetector(config["ball_detector"], debug=False)
     print("Initalizing ball tracker.")
     ball_tracker = EuclidianTracker(10)
     print("Initializing aruco detector")

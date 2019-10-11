@@ -28,12 +28,12 @@ def merge_keypoints(keypoints, radius):
 
 class BallDetector:
 
-    def __init__(self, yellowLowTres, yellowHighTres, pinkLowTres, pinkHighTres, ballSizeRange=(15, 30), debug=False):
-        self.yellowLowTres = yellowLowTres
-        self.yellowHighTres = yellowHighTres
-        self.pinkLowTres = pinkLowTres
-        self.pinkHighTres = pinkHighTres
-        self.ballSizeRange = ballSizeRange
+    def __init__(self, config, debug=False):
+        self.yellowLowTres = np.array(config["yellow_low"])
+        self.yellowHighTres = np.array(config["yellow_high"])
+        self.pinkLowTres = np.array(config["pink_low"])
+        self.pinkHighTres = np.array(config["pink_high"])
+        self.ballSizeRange = np.array(config["radius_range"])
         self.debug = debug
         self.fast = cv2.FastFeatureDetector_create()
         if debug:
@@ -136,7 +136,9 @@ class BallDetector:
             color = (127, 0, 255)
             if ball.color == Color.YELLOW:
                 color = (0, 179, 255)
-            cv2.circle(img, ball.centroid, ball.radius, color, 2)
+            print(ball)
+            cv2.circle(img, ball.center, ball.radius, color, 2)
+            cv2.circle(img, ball.center, 2, color, 2)
         cv2.imshow('yellow', yellow_mask)
         cv2.imshow('pink', pink_mask)
         cv2.imshow('debug', img)
