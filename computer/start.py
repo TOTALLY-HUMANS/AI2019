@@ -195,8 +195,8 @@ def ChaseTarget(robot, tracked, robot_pose):
     # Liikutaan pallon taakse
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
-        updateState(robot, RobotState.PrepareToHitTarget)
+    #if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
+    #    updateState(robot, RobotState.PrepareToHitTarget)
 
 # Tahdataan palloon
 def PrepareToHitTarget(robot, tracked, robot_pose):
