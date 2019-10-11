@@ -13,13 +13,14 @@ def main():
 	if os.path.isfile("./1"): ID = 1
 	if os.path.isfile("./2"): ID = 2
 	ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
+	USC = UltrasonicCapture()
 	if not ser.isOpen():
 		return
 		#print("cant open serial")
 		#return
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect(('192.168.43.42',50001))
-	message = ID + "DISTANCE:" + UltrasonicCapture.read()
+	s.connect(('192.168.43.181',50001))
+	message = str(ID) + "DISTANCE:" + str(USC.read())
 	while 1:
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
