@@ -47,10 +47,11 @@ class RobotState(IntEnum):
     ChaseTarget = 2
     PrepareToHitTarget = 3
     HitTarget = 4
+
 robot_1_id = 16
 robot_2_id = 17
-robot_1_state = RobotState.Idle
-robot_2_state = RobotState.Idle
+robot_1_state : global = RobotState.Idle
+robot_2_state : global = RobotState.Idle
 robot_1_target = None
 robot_2_target = None
 UltrasonicSensor = None
