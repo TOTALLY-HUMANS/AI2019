@@ -11,7 +11,7 @@ from cv2 import aruco
 
 from scipy.spatial import distance
 
-from enum import Enum
+from enum import IntEnum
 
 from av_video_capture import AvVideoCapture
 from video_capture import VideoCapture
@@ -41,7 +41,7 @@ radius_range = [13, 16]
 centimeter = 10
 
 # ROBOT STATE DEFINITIONS
-class RobotState(Enum):
+class RobotState(IntEnum):
     Idle = 0
     FindTarget = 1
     ChaseTarget = 2
@@ -229,7 +229,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     pose_found = False
     for pos in robot_positions:
         if pos[3] == robot:
-            robot_pose = pos
+            robot_pose = posx
             pose_found = True
     if not pose_found:
         print(str(robot) + ": No robot found, idling")
