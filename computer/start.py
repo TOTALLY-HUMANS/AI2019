@@ -214,7 +214,7 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
         socket = SI1
     if robot == robot_2_id:
         socket = SI2
-    if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, target):
+    if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
 
         updateState(robot, RobotState.HitTarget)
     
@@ -325,7 +325,7 @@ def coordinatesForRobotBehindBall(ball):
     return position_behind_ball
 
 def isNearTarget(robot_pose, target):
-    dist = distance.euclidean(target.center, (robot_pose[0], robot_pose[1]))
+    dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
     if dist < centimeter * 10:
         return True
     return False
