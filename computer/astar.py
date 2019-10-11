@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 
 def heuristic(a, b):
     return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
+    #return abs(b[0] - a[0])  + abs(b[1] - a[1]) 
 
 def astar(array, start, goal):
 
-    neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
+    #neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
+    neighbors = [(0,1),(0,-1),(1,0),(-1,0)]
 
     close_set = set()
     came_from = {}
@@ -36,10 +38,10 @@ def astar(array, start, goal):
         close_set.add(current)
         for i, j in neighbors:
             neighbor = current[0] + i, current[1] + j            
-            tentative_g_score = gscore[current] + heuristic(current, neighbor)
+            tentative_g_score = gscore[current] + 1.0#heuristic(current, neighbor)
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:                
-                    if array[neighbor[0]][neighbor[1]] == 1:
+                    if array[neighbor[0]][neighbor[1]] >= 1:
                         continue
                 else:
                     # array bound y walls
@@ -63,6 +65,7 @@ def astar(array, start, goal):
    astar(array, start, destination)
    astar function returns a list of points (shortest path)'''
 
+'''
 nmap_ = numpy.array([
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
@@ -102,4 +105,4 @@ plt.scatter([i[1] for i in obstacles], [i[0] for i in obstacles], color='g', mar
 plt.ylabel('some numbers')
 plt.show()
     
-
+'''

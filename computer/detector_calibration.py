@@ -7,7 +7,6 @@ import cv2
 import av
 import numpy as np
 
-
 #from scipy.spatial import distance
 
 from enum import Enum
@@ -21,6 +20,8 @@ from aruco_detector import ArucoDetector
 
 from my_robot import drive_commands
 from socket_interface import socketInterface
+
+from astar import astar
 
 url= "udp://224.0.0.0:1234"
 def downscale_image(img, scale_percent):
@@ -72,17 +73,25 @@ def main():
                     c,s = np.cos(theta), np.sin(theta)
                     t = np.array([x,y])
                     rot_mat = np.array((c, -s),(s, c))
-                    for i in range(-20,20):
-                      for j in range(-20,20):
+                    for i in range(-30,30):
+                      for j in range(-30,30):
                         trans_i = i*c +s*j
                         trans_j = -i*s +c*j
                         mask[int(trans_i+y),int(trans_j+x)] = 255
-                      
-                    
-                #mask[:,:] = 255
-                cv2.imshow('orig', img)
-                cv2.imshow('mask_test', mask)
+ 
+                # dilate balls and robot, resize mask
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
+                mask = cv2.dilate(mask, kernel, iterations=10)
+                mask = cv2.resize(mask, (200, 200))
 
+                # find path
+                path = astar(mask, (90,90), (149,149))
+                path_x = [i[0] for i in path] 
+                path_y = [i[1] for i in path]
+                mask[path_x, path_y] = 125
+
+                #cv2.imshow('orig', img)
+                cv2.imshow('mask_test', mask)
                 key = cv2.waitKey(1)
 
     except:
