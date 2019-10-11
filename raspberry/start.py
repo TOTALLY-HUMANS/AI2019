@@ -7,7 +7,7 @@ from ultrasonic_capture import UltrasonicCapture
 import socket
 
 import os.path
-
+mac = '34:F3:9A:CA:C8:3E'
 
 def main():
 	if os.path.isfile("./1"): ID = 1
@@ -17,8 +17,8 @@ def main():
 		return
 		#print("cant open serial")
 		#return
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect(('192.168.43.42',50001))
+	s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+	s.connect((mac,3))
 	message = ID + "DISTANCE:" + UltrasonicCapture.read()
 	while 1:
 		s.sendall(message.encode())
