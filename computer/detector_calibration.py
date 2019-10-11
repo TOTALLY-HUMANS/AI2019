@@ -39,11 +39,9 @@ def main():
     print("Connecting to camera.")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-<<<<<<< HEAD
-    cap = cv2.VideoCapture("videos/Balls1.ts")
-=======
+
     cap = cv2.VideoCapture("videos/ArucoVideo.ts")
->>>>>>> fe9a71101e873a92d5b20fdea36953a8372bda82
+
     print("Initializing ball detector.")
     ball_detector = BallDetector(config["ball_detector"], debug=False)
     aruco_detector = ArucoDetector()
@@ -73,8 +71,9 @@ def main():
                     x2 = int(x+robot_half_width)
                     y1 = int(y-robot_half_width)
                     y2 = int(y+robot_half_width)
-                    mask[0:500,0:500] = np.zeros([500,500])
-                
+
+                mask[0:500,0:500] = 255*np.ones([500,500])
+                #mask = np.zeros(mask.shape)
                 cv2.imshow('orig', img)
                 cv2.imshow('mask_test', mask)
 

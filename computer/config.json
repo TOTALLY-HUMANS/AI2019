@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"downscale_p": 90, "url": "udp://224.0.0.0:1234", "ball_detector": {"yellow_low": [25, 50, 158], "yellow_high": [35, 255, 255], "pink_low": [107, 50, 160], "pink_high": [175, 255, 255], "radius_range": [12, 16]}}
-=======
 {"arena_side": 402, "downscale_p": 90, "url": "udp://224.0.0.0:1234", "ball_detector": {"yellow_low": [25, 50, 158], "yellow_high": [35, 255, 255], "pink_low": [150, 50, 160], "pink_high": [175, 255, 255], "radius_range": [12, 16]}}
->>>>>>> fe9a71101e873a92d5b20fdea36953a8372bda82
