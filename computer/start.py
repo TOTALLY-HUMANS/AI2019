@@ -19,6 +19,7 @@ from video_capture import VideoCapture
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
 from euclidian_tracker import EuclidianTracker
+from ultrasonic_capture import UltrasonicCapture
 
 from my_robot import drive_commands
 from socket_interface import socketInterface
@@ -43,12 +44,17 @@ centimeter = 10
 # ROBOT STATE DEFINITIONS
 class RobotState(Enum):
     Idle = 0
-    ChaseClosestRedBall = 1
-    ChaseClosestGreenBall = 2
+    FindTarget = 1
+    ChaseTarget = 2
+    PrepareToHitTarget = 3
+    HitTarget = 4
 robot_1_id = 15
 robot_2_id = 16
-robot_1_state = RobotState.ChaseClosestGreenBall
-robot_2_state = RobotState.ChaseClosestRedBall
+robot_1_state = RobotState.Idle
+robot_2_state = RobotState.Idle
+robot_1_target = None
+robot_2_target = None
+UltrasonicSensor = None
 own_goal_pose = (0, 0)
 opponent_goal_pose = (1080, 1080)
 ROBOT_SIZE = 100
@@ -90,8 +96,6 @@ def main():
                 
                 visualize_detected(img, tracked_balls, corners, ids, positions)
                 
-            
-
                 # Run robot AI
                 #evaluateRobotState(15, tracked_balls, positions)
                 #evaluateRobotState(16, tracked_balls, positions)
@@ -113,7 +117,6 @@ def downscale_image(img, scale_percent):
     dim = (width, height)
 
     return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-
 
 def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
     for key,val in balls.items():
@@ -146,6 +149,7 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 
 ### HERE BEGINS ROBOT AI ###
 
+# Evaluoi robotin tilaa, pyörittää tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
     if robot == 15:
         currentRobotState = robot_1_state
@@ -153,8 +157,10 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         currentRobotState = robot_2_state
     robotStates = {
         0: Idle,
-        1: ChaseClosestRedBall,
-        2: ChaseClosestGreenBall,
+        1: FindTarget,
+        2: ChaseTarget,
+        3: PrepareToHitTarget,
+        4: HitTarget,
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
@@ -163,10 +169,11 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
             robot_pose = pos
             pose_found = True
     if not pose_found:
-        print("No robot found, idling")
+        print(robot + ": No robot found, idling")
         updateState(robot, RobotState.Idle)
     robotStates[currentRobotState](robot, ball_positions, robot_pose)
 
+# Vaihdetaan tilakoneen tilaa
 def updateState(robot, newState):
     if robot == robot_1_id:
         robot_1_state = newState
@@ -175,33 +182,69 @@ def updateState(robot, newState):
 
 # STATES
 
+# Robotti idlaa oletustilassaan, ja koettaa löytää kohteen
 def Idle(robot, tracked, robot_pose):
-    print("Idling")
-    updateState(robot, RobotState.ChaseClosestRedBall)
+    print(robot + ": Idling")
+    updateState(robot, RobotState.FindTarget)
 
-def ChaseClosestRedBall(robot, tracked, robot_pose):
-    print("Chasing red balls...")
-    if len(tracked) == 0:
-        print("No balls found, idling")
+# Robotti etsii kohteen
+def FindTarget(robot, tracked, robot_pose):
+    print(robot + ": Finding target...")
+    if len(tracked) == 0: # Palloja ei löydy, idlataan
+        print(robot + ": No balls found, idling")
         updateState(robot, RobotState.Idle)
         return
-    target = getClosestBall(tracked, robot_pose, -1)
-    moveTowardsTarget(robot, target, robot_pose)
-    if isNearTarget(robot_pose, target):
-        updateState(robot, RobotState.PrepareToHitRedBall)
+    if robot == robot_1_id: # Ykkösrobo jahtaa punaista
+        robot_1_target = target = getClosestBall(tracked, robot_pose, -1)
+    if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
+        robot_2_target = target = getClosestBall(tracked, robot_pose, 1)
+    if target is not None:
+        updateState(robot, RobotState.ChaseTarget) # Kohde löytyy, lähdetään perään
+    else:
+        updateState(robot, RobotState.Idle) # Kohdetta ei löydy, idlataan
 
-def ChaseClosestGreenBall(robot, tracked, robot_pose):
-    print("Chasing green balls...")
-    if len(tracked) == 0:
-        print("No balls found, idling")
+# Ajetaan pallon tyypistä riippuen sen eteen tai taakse
+def ChaseTarget(robot, tracked, robot_pose):
+    print(robot + ": Chasing target...")
+    target = getTarget(robot)
+    # Liikutaan pallon taakse
+    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
+    # Jos ollaan riittävän lähellä palloa, tähdätään siihen
+    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
+        updateState(robot, RobotState.PrepareToHitTarget)
+
+# Tähdätään palloon
+def PrepareToHitTarget(robot, tracked, robot_pose):
+    print(robot + ": Preparing to hit target...")
+    # Käännytään kohti palloa
+    target = getTarget(robot)
+    rotateTowardsTarget(robot, target)
+    # Jos ollaan riittävän lähellä, jyrätään päin
+    if UltrasonicCapture.read() < 20 * centimeter and isNearTarget(robot_pose, target):
+        updateState(robot, RobotState.HitTarget)
+    
+# Jyrätään palloon
+def HitTarget(robot, tracked, robot_pose):
+    print(robot + ": Hitting target...")
+    # Ajetaan päin
+    ramForward(robot)
+    # Pallo karkasi, palataan idlaamaan (ja etsimään uutta kohdetta)
+    if UltrasonicCapture.read() > 30 * centimeter:
+        # Nollataan kohde
+        if robot == robot_1_id:
+            robot_1_target = None
+        if robot == robot_2_id:
+            robot_2_target = None
         updateState(robot, RobotState.Idle)
-        return
-    target = getClosestBall(tracked, robot_pose, 1)
-    moveTowardsTarget(robot, target, robot_pose)
-    if isNearTarget(robot_pose, target):
-        updateState(robot, RobotState.PrepareToHitGreenBall)
 
 # HELPER METHODS
+
+# Luetaan kohde
+def getTarget(robot):
+    if robot == robot_1_id:
+        return robot_1_target
+    if robot == robot_2_id:
+        return robot_2_target
 
 """
 Return coordinates behind the ball based on the color of the ball and the position of the goal
@@ -225,7 +268,6 @@ def coordinatesForRobotBehindBall(ball):
     
     return position_behind_ball
 
-
 def isNearTarget(robot_pose, target):
     dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
     if dist < centimeter * 10:
@@ -233,19 +275,29 @@ def isNearTarget(robot_pose, target):
     return False
 
 def getClosestBall(tracked, robot_pose, ballType):
-    chosenBall = tracked[0]
+    chosenBall = None
     shortestDistance = 100000
     for ball in tracked.values():
-        if (ball[3] == ballType):
+        if (ball.color == ballType):
             dist = distance.euclidean((ball[0], ball[1]), (robot_pose[0], robot_pose[1]))
             if (dist < shortestDistance):
                 shortestDistance = dist
                 chosenBall = ball
     return chosenBall
 
-def moveTowardsTarget(robot, ball_pose, robot_pose):
-    ball_x = ball_pose[0]
-    ball_y = ball_pose[1]
+# ROBOTIN LIIKKUMINEN
+
+def ramForward(robot):
+    print("Nyt mennään")
+    # AJETAAN LUJAA PÄIN
+
+def rotateTowardsTarget(robot, target):
+    print("Käännytään targettiin")
+    # Käännytään kohti targetia
+
+def moveTowardsTarget(robot, target_pose, robot_pose):
+    target_x = target_pose[0]
+    target_y = target_pose[1]
     robot_x = robot_pose[0]
     robot_y = robot_pose[1]
     robot_yaw = robot_pose[2]
@@ -257,7 +309,7 @@ def moveTowardsTarget(robot, ball_pose, robot_pose):
     brakezone = 50
 
     r_com, l_com = drive_commands(
-        ball_x, ball_y, robot_x, robot_y, robot_yaw)
+        target_x, target_y, robot_x, robot_y, robot_yaw)
     r_com = 150*r_com #255*r_com
     l_com = 150*l_com #255*l_com
 
