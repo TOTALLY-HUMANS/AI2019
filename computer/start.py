@@ -150,6 +150,7 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
+    currentRobotState = RobotState.Idle
     if robot == 16:
         currentRobotState = robot_1_state
     if robot == 17:
