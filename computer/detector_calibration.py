@@ -16,7 +16,7 @@ from av_video_capture import AvVideoCapture
 from video_capture import VideoCapture
 
 from ball_detector import BallDetector
-#from aruco_detector import ArucoDetector
+from aruco_detector import ArucoDetector
 #from euclidian_tracker import EuclidianTracker
 
 from my_robot import drive_commands
@@ -39,19 +39,51 @@ def main():
     print("Connecting to camera.")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture(url)
+
+    cap = cv2.VideoCapture("videos/ArucoVideo.ts")
+
     print("Initializing ball detector.")
-    ball_detector = BallDetector(config["ball_detector"], debug=True)
+    ball_detector = BallDetector(config["ball_detector"], debug=False)
+    aruco_detector = ArucoDetector()
+    print(config)
+    cm_in_pixels = (1080*(config["downscale_p"]/100))/config["arena_side"]
+    robot_max_width = 40*cm_in_pixels
+    robot_half_width = robot_max_width*0.5
+    print(cm_in_pixels)
     try:
         while 1:
             ret, img = cap.read()
-            print(img)
+            
 
             if ret:
 
                 img = downscale_image(img, config["downscale_p"])
 
-                balls = ball_detector.detect_balls(img)  
+                balls, mask = ball_detector.detect_balls(img)  
+
+                corners, ids = aruco_detector.get_arucos(img)
+                positions = aruco_detector.get_positions(corners, ids)
+                #print(mask.max())
+                for p in positions:
+                    #print(p)
+                    x = p[0]
+                    y = p[1]
+                    theta = p[2]
+                    c,s = np.cos(theta), np.sin(theta)
+                    t = np.array([x,y])
+                    rot_mat = np.array((c, -s),(s, c))
+                    for i in range(-20,20):
+                      for j in range(-20,20):
+                        trans_i = i*c +s*j
+                        trans_j = -i*s +c*j
+                        mask[int(trans_i+y),int(trans_j+x)] = 255
+                      
+                    
+                #mask[:,:] = 255
+                cv2.imshow('orig', img)
+                cv2.imshow('mask_test', mask)
+
+                key = cv2.waitKey(1)
 
     except:
         raise

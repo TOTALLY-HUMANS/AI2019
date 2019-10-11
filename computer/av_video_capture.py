@@ -4,6 +4,7 @@ import threading
 #Install pyav using conda install av -c conda-forge
 
 class AvVideoCapture:
+    '''Reads and decodes a udp multicast stream'''
 
     def __init__(self, url):
         self.context = av.Codec('h264', 'r').create()

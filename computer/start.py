@@ -87,7 +87,7 @@ def main():
                 
                 img = downscale_image(img, 90)
 
-                balls = ball_detector.detect_balls(img)
+                balls,mask = ball_detector.detect_balls(img)
                 tracked_balls = ball_tracker.update(balls)
 
                 corners, ids = aruco_detector.get_arucos(img)
