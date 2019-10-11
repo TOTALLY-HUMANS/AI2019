@@ -229,7 +229,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     pose_found = False
     for pos in robot_positions:
         if pos[3] == robot:
-            robot_pose = posx
+            robot_pose = (pos[0], pos[1], pos[2])
             pose_found = True
     if not pose_found:
         print(str(robot) + ": No robot found, idling")
