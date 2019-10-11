@@ -215,11 +215,6 @@ def HitTarget(robot, tracked, robot_pose):
 
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
-    currentRobotState = RobotState.Idle
-    if robot == robot_1_id:
-        currentRobotState = robot_1_state
-    if robot == robot_2_id:
-        currentRobotState = robot_2_state
     robotStates = {
         0: Idle,
         1: FindTarget,
@@ -237,14 +232,19 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         print(str(robot) + ": No robot found, idling")
         updateState(robot, RobotState.Idle)
     print(str(robot) + ": Running state " + str(currentRobotState))
-    robotStates[currentRobotState](robot, ball_positions, robot_pose)
+    if robot == robot_1_id:
+        robotStates[robot_1_state](robot, ball_positions, robot_pose)
+    if robot == robot_2_id:
+        robotStates[robot_2_state](robot, ball_positions, robot_pose)
 
 # Vaihdetaan tilakoneen tilaa
 def updateState(robot, newState):
     if robot == robot_1_id:
         robot_1_state = newState
+        print(str(robot) + " changes to state " + str(robot_1_state))
     if robot == robot_2_id:
         robot_2_state = newState
+        print(str(robot) + " changes to state " + str(robot_2_state))
 
 
 
