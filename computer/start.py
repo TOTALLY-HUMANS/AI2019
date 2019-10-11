@@ -176,7 +176,7 @@ def FindTarget(robot, tracked, robot_pose):
     if robot == robot_1_id: # Ykkosrobo jahtaa punaista
         key, ball = getClosestBall(tracked, robot_pose, -1)
         robot_1_target = target = ball
-        robot_2_target_id = key
+        robot_1_target_id = key
     if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
         key, ball = getClosestBall(tracked, robot_pose, 1)
         robot_2_target = target = ball
