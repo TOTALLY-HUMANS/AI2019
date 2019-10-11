@@ -37,13 +37,13 @@ def main():
         config = json.load(json_data)
 
     print("Connecting to camera.")
-    #cap = AvVideoCapture(url)
+    cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
 
-    cap = cv2.VideoCapture("videos/ArucoVideo.ts")
+    #cap = cv2.VideoCapture("videos/ArucoVideo.ts")
 
     print("Initializing ball detector.")
-    ball_detector = BallDetector(config["ball_detector"], debug=False)
+    ball_detector = BallDetector(config["ball_detector"], debug=True)
     aruco_detector = ArucoDetector()
     print(config)
     cm_in_pixels = (1080*(config["downscale_p"]/100))/config["arena_side"]
@@ -80,8 +80,8 @@ def main():
                       
                     
                 #mask[:,:] = 255
-                cv2.imshow('orig', img)
-                cv2.imshow('mask_test', mask)
+                #cv2.imshow('orig', img)
+                #cv2.imshow('mask_test', mask)
 
                 key = cv2.waitKey(1)
 
