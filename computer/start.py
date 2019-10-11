@@ -54,6 +54,8 @@ robot_1_state = RobotState.Idle
 robot_2_state = RobotState.Idle
 robot_1_target = None
 robot_2_target = None
+SI1 = None
+SI2 = None
 UltrasonicSensor = None
 own_goal_pose = (0, 0)
 opponent_goal_pose = (1080, 1080)
@@ -61,6 +63,8 @@ ROBOT_SIZE = 100
 
 # MAIN LOOPERO
 def main():
+    global SI1
+    global SI2
     print("Loading configuration.")
     with open('config.json') as json_data:
         config = json.load(json_data)
@@ -276,6 +280,9 @@ Input:
     a ball (x, y, ballType)
 """
 def coordinatesForRobotBehindBall(ball):
+    global opponent_goal_pose
+    global own_goal_pose
+
     x,y = ball.center
     color = ball.color
 
@@ -319,6 +326,9 @@ def rotateTowardsTarget(robot, target):
     # Kaannytaan kohti targetia
 
 def moveTowardsTarget(robot, target_pose, robot_pose):
+    global SI1
+    global SI2
+
     target_x = target_pose[0]
     target_y = target_pose[1]
     robot_x = robot_pose[0]
