@@ -3,11 +3,14 @@ import serial
 import time
 
 from ultrasonic_capture import UltrasonicCapture
+from test_servo_run import ServoController
 
 import socket
 
 import os.path
+mac = '34:F3:9A:CA:C8:3E'
 
+SC = ServoController()
 
 def main():
 	if os.path.isfile("./1"): ID = 1
@@ -17,21 +20,26 @@ def main():
 		return
 		#print("cant open serial")
 		#return
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect(('192.168.43.42',50001))
+	s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+	s.connect((mac,3))
 	message = ID + "DISTANCE:" + UltrasonicCapture.read()
 	while 1:
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
 		#print(data)
-		split_data = data.split('#')
-		#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
-		r_com = str(split_data[0])
-		l_com = str(split_data[1])
-        	data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
-		#if not ser.isOpen():
+		if data[0] = 'M':
+			split_data = data.split('#')
+			#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
+			r_com = str(split_data[0])
+			l_com = str(split_data[1])
+			data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
+			#if not ser.isOpen():
 			#print("serial not ok")
-	        ser.write(data)
+			ser.write(data)
+		if data[0] = 'S':
+			SC.MoveForward()
+		if data[0] = 'R':
+			SC.MoveBackward()
 
 
 

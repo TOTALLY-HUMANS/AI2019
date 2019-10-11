@@ -176,7 +176,7 @@ def FindTarget(robot, tracked, robot_pose):
     if robot == robot_1_id: # Ykkosrobo jahtaa punaista
         key, ball = getClosestBall(tracked, robot_pose, -1)
         robot_1_target = target = ball
-        robot_2_target_id = key
+        robot_1_target_id = key
     if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
         key, ball = getClosestBall(tracked, robot_pose, 1)
         robot_2_target = target = ball
@@ -195,8 +195,8 @@ def ChaseTarget(robot, tracked, robot_pose):
     # Liikutaan pallon taakse
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
-        updateState(robot, RobotState.PrepareToHitTarget)
+    #if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
+    #    updateState(robot, RobotState.PrepareToHitTarget)
 
 # Tahdataan palloon
 def PrepareToHitTarget(robot, tracked, robot_pose):
@@ -214,6 +214,7 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
         socket = SI1
     if robot == robot_2_id:
         socket = SI2
+    socket.servo_forward()
     if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
 
         updateState(robot, RobotState.HitTarget)
