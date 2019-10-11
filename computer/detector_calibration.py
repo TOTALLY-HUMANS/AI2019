@@ -39,7 +39,7 @@ def main():
     print("Connecting to camera.")
     #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture(url)
+    cap = cv2.VideoCapture("videos/Balls1.ts")
     print("Initializing ball detector.")
     ball_detector = BallDetector(config["ball_detector"], debug=True)
     try:
