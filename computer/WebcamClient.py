@@ -90,11 +90,11 @@ def main():
                     r_com = 0.0
                     l_com = 0.0
                     deadzone = 90
-                    brakezone = 50
+                    brakezone = 20
                     if ball_found:
                       r_com, l_com = drive_commands(ball_x, ball_y, robot_x, robot_y, robot_yaw)
-                      r_com = 255*r_com
-                      l_com = 255*l_com
+                      r_com = 128*r_com
+                      l_com = 128*l_com
                       
                       if abs(r_com) < brakezone:
                         r_com = 0
