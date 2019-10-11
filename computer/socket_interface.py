@@ -39,6 +39,7 @@ class socketInterface():
       if string[0] == '1': dist1 = float(string[10,len(string)])
       if string[0] == '2': dist2 = float(string[10,len(string)])
   
-  #def __del__(self):
-  #  self.conn.close()
+  def __del__(self):
+    if self.conn is not None:
+      self.conn.close()
 
