@@ -148,38 +148,6 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 
 ### HERE BEGINS ROBOT AI ###
 
-# Evaluoi robotin tilaa, pyorittaa tilakonetta
-def evaluateRobotState(robot, ball_positions, robot_positions):
-    currentRobotState = RobotState.Idle
-    if robot == 16:
-        currentRobotState = robot_1_state
-    if robot == 17:
-        currentRobotState = robot_2_state
-    robotStates = {
-        0: Idle,
-        1: FindTarget,
-        2: ChaseTarget,
-        3: PrepareToHitTarget,
-        4: HitTarget,
-    }
-    robot_pose = (0.0, 0.0, 0.0)
-    pose_found = False
-    for pos in robot_positions:
-        if pos[3] == robot:
-            robot_pose = pos
-            pose_found = True
-    if not pose_found:
-        print(str(robot) + ": No robot found, idling")
-        updateState(robot, RobotState.Idle)
-    robotStates[currentRobotState](robot, ball_positions, robot_pose)
-
-# Vaihdetaan tilakoneen tilaa
-def updateState(robot, newState):
-    if robot == robot_1_id:
-        robot_1_state = newState
-    if robot == robot_2_id:
-        robot_2_state = newState
-
 # STATES
 
 # Robotti idlaa oletustilassaan, ja koettaa loytaa kohteen
@@ -240,6 +208,42 @@ def HitTarget(robot, tracked, robot_pose):
         if robot == robot_2_id:
             robot_2_target = None
         updateState(robot, RobotState.Idle)
+
+
+
+# Evaluoi robotin tilaa, pyorittaa tilakonetta
+def evaluateRobotState(robot, ball_positions, robot_positions):
+    currentRobotState = RobotState.Idle
+    if robot == 16:
+        currentRobotState = robot_1_state
+    if robot == 17:
+        currentRobotState = robot_2_state
+    robotStates = {
+        0: Idle,
+        1: FindTarget,
+        2: ChaseTarget,
+        3: PrepareToHitTarget,
+        4: HitTarget,
+    }
+    robot_pose = (0.0, 0.0, 0.0)
+    pose_found = False
+    for pos in robot_positions:
+        if pos[3] == robot:
+            robot_pose = pos
+            pose_found = True
+    if not pose_found:
+        print(str(robot) + ": No robot found, idling")
+        updateState(robot, RobotState.Idle)
+    robotStates[currentRobotState](robot, ball_positions, robot_pose)
+
+# Vaihdetaan tilakoneen tilaa
+def updateState(robot, newState):
+    if robot == robot_1_id:
+        robot_1_state = newState
+    if robot == robot_2_id:
+        robot_2_state = newState
+
+
 
 # HELPER METHODS
 
