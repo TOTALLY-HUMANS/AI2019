@@ -167,8 +167,10 @@ def FindTarget(robot, tracked, robot_pose):
     if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
         robot_2_target = target = getClosestBall(tracked, robot_pose, 1)
     if target is not None:
+        print(str(robot) + ": Starting chase...")
         updateState(robot, RobotState.ChaseTarget) # Kohde loytyy, lahdetaan peraan
     else:
+        print(str(robot) + ": No suitable ball found, idling...")
         updateState(robot, RobotState.Idle) # Kohdetta ei loydy, idlataan
 
 # Ajetaan pallon tyypista riippuen sen eteen tai taakse
