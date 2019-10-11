@@ -69,14 +69,15 @@ def main():
                     x = p[0]
                     y = p[1]
                     theta = p[2]
-                    rot_mat = np
-                    x1 = int(x-robot_half_width)
-                    x2 = int(x+robot_half_width)
-                    y1 = int(y-robot_half_width)
-                    y2 = int(y+robot_half_width)
-
-                    #print(x1,x2,y1,y2)
-                    mask[y1:y2,x1:x2] = 255
+                    c,s = np.cos(theta), np.sin(theta)
+                    t = np.array([x,y])
+                    rot_mat = np.array((c, -s),(s, c))
+                    for i in range(-20,20):
+                      for j in range(-20,20):
+                        trans_i = i*c +s*j
+                        trans_j = -i*s +c*j
+                        mask[int(trans_i+y),int(trans_j+x)] = 255
+                      
                     
                 #mask[:,:] = 255
                 cv2.imshow('orig', img)
