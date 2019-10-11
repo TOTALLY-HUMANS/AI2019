@@ -231,10 +231,11 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     if not pose_found:
         print(str(robot) + ": No robot found, idling")
         updateState(robot, RobotState.Idle)
-    print(str(robot) + ": Running state " + str(currentRobotState))
     if robot == robot_1_id:
+        print(str(robot) + ": Running state " + str(robot_1_state))
         robotStates[robot_1_state](robot, ball_positions, robot_pose)
     if robot == robot_2_id:
+        print(str(robot) + ": Running state " + str(robot_2_state))
         robotStates[robot_2_state](robot, ball_positions, robot_pose)
 
 # Vaihdetaan tilakoneen tilaa
