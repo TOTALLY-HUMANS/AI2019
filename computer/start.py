@@ -214,6 +214,7 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
         socket = SI1
     if robot == robot_2_id:
         socket = SI2
+    socket.servo_forward()
     if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
 
         updateState(robot, RobotState.HitTarget)

@@ -3,11 +3,17 @@ import serial
 import time
 
 from ultrasonic_capture import UltrasonicCapture
+from test_servo_run import ServoController
 
 import socket
 
 import os.path
+<<<<<<< HEAD
 mac = '34:F3:9A:CA:C8:3E'
+=======
+
+SC = ServoController()
+>>>>>>> af5f9782262304085740fd48862ddfa44b97ba3d
 
 def main():
 	if os.path.isfile("./1"): ID = 1
@@ -24,14 +30,19 @@ def main():
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
 		#print(data)
-		split_data = data.split('#')
-		#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
-		r_com = str(split_data[0])
-		l_com = str(split_data[1])
-        	data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
-		#if not ser.isOpen():
+		if data[0] = 'M':
+			split_data = data.split('#')
+			#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
+			r_com = str(split_data[0])
+			l_com = str(split_data[1])
+			data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
+			#if not ser.isOpen():
 			#print("serial not ok")
-	        ser.write(data)
+			ser.write(data)
+		if data[0] = 'S':
+			SC.MoveForward()
+		if data[0] = 'R':
+			SC.MoveBackward()
 
 
 
