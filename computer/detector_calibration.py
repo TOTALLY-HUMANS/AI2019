@@ -46,9 +46,10 @@ def main():
     ball_detector = BallDetector(config["ball_detector"], debug=False)
     aruco_detector = ArucoDetector()
     print(config)
-    cm_in_pixels = (1080*config["downscale_p"])/config["arena_side"]
+    cm_in_pixels = (1080*(config["downscale_p"]/100))/config["arena_side"]
     robot_max_width = 40*cm_in_pixels
     robot_half_width = robot_max_width*0.5
+    print(cm_in_pixels)
     try:
         while 1:
             ret, img = cap.read()
@@ -62,18 +63,22 @@ def main():
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
-                print(mask)
+                #print(mask.max())
                 for p in positions:
-                    print(p)
+                    #print(p)
                     x = p[0]
                     y = p[1]
+                    theta = p[2]
+                    rot_mat = np
                     x1 = int(x-robot_half_width)
                     x2 = int(x+robot_half_width)
                     y1 = int(y-robot_half_width)
                     y2 = int(y+robot_half_width)
 
-                mask[0:500,0:500] = 255*np.ones([500,500])
-                #mask = np.zeros(mask.shape)
+                    #print(x1,x2,y1,y2)
+                    mask[y1:y2,x1:x2] = 255
+                    
+                #mask[:,:] = 255
                 cv2.imshow('orig', img)
                 cv2.imshow('mask_test', mask)
 
