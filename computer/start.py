@@ -287,7 +287,7 @@ def getClosestBall(tracked, robot_pose, ballType):
     shortestDistance = 100000
     for ball in tracked.values():
         if (ball.color == ballType):
-            dist = distance.euclidean((ball[0], ball[1]), (robot_pose[0], robot_pose[1]))
+            dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
             if (dist < shortestDistance):
                 shortestDistance = dist
                 chosenBall = ball
