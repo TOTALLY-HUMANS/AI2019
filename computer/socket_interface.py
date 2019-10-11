@@ -1,5 +1,6 @@
 import socket
 import time
+import threading
 
 dist1 = 0
 dist2 = 0
@@ -10,10 +11,10 @@ class socketInterface():
     self.setup_socket()
 
   def setup_socket(self):
-	  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	  s.bind(('', 50001))
-	  s.listen(1)
-	  self.conn, addr = s.accept()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('', 50001))
+    s.listen(1)
+    self.conn, addr = s.accept()
     t = threading.Thread(target=self._reader)
     t.daemon = True
     t.start()
@@ -35,9 +36,9 @@ class socketInterface():
         string = str(robo_m).index("DISTANCE:")
       except:
         return
-      if string[0] = '1': dist1 = float(string[10,len(string)])
-      if string[0] = '2': dist2 = float(string[10,len(string)])
+      if string[0] == '1': dist1 = float(string[10,len(string)])
+      if string[0] == '2': dist2 = float(string[10,len(string)])
   
-  def __del__(self):
-  	self.conn.close()
+  #def __del__(self):
+  #  self.conn.close()
 

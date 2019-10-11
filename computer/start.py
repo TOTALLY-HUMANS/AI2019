@@ -47,8 +47,8 @@ class RobotState(Enum):
     ChaseTarget = 2
     PrepareToHitTarget = 3
     HitTarget = 4
-robot_1_id = 15
-robot_2_id = 16
+robot_1_id = 16
+robot_2_id = 17
 robot_1_state = RobotState.Idle
 robot_2_state = RobotState.Idle
 robot_1_target = None
@@ -63,7 +63,7 @@ def main():
     print("Loading configuration.")
     with open('config.json') as json_data:
         config = json.load(json_data)
-    #SI1 = socketInterface()
+    SI1 = socketInterface()
     #SI2 = socketInterface()
 
     print("Connecting to camera.")
@@ -96,8 +96,8 @@ def main():
                 visualize_detected(img, tracked_balls, corners, ids, positions)
                 
                 # Run robot AI
-                #evaluateRobotState(15, tracked_balls, positions)
-                #evaluateRobotState(16, tracked_balls, positions)
+                evaluateRobotState(16, tracked_balls, positions)
+                #evaluateRobotState(17, tracked_balls, positions)
 
             time2 = time.time()
             frame_time = (time2-time1)*1000
@@ -150,9 +150,9 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
-    if robot == 15:
-        currentRobotState = robot_1_state
     if robot == 16:
+        currentRobotState = robot_1_state
+    if robot == 17:
         currentRobotState = robot_2_state
     robotStates = {
         0: Idle,
@@ -168,7 +168,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
             robot_pose = pos
             pose_found = True
     if not pose_found:
-        print(robot + ": No robot found, idling")
+        print(str(robot) + ": No robot found, idling")
         updateState(robot, RobotState.Idle)
     robotStates[currentRobotState](robot, ball_positions, robot_pose)
 
@@ -183,14 +183,14 @@ def updateState(robot, newState):
 
 # Robotti idlaa oletustilassaan, ja koettaa loytaa kohteen
 def Idle(robot, tracked, robot_pose):
-    print(robot + ": Idling")
+    print(str(robot) + ": Idling")
     updateState(robot, RobotState.FindTarget)
 
 # Robotti etsii kohteen
 def FindTarget(robot, tracked, robot_pose):
-    print(robot + ": Finding target...")
+    print(str(robot) + ": Finding target...")
     if len(tracked) == 0: # Palloja ei loydy, idlataan
-        print(robot + ": No balls found, idling")
+        print(str(robot) + ": No balls found, idling")
         updateState(robot, RobotState.Idle)
         return
     if robot == robot_1_id: # Ykkosrobo jahtaa punaista
@@ -204,7 +204,7 @@ def FindTarget(robot, tracked, robot_pose):
 
 # Ajetaan pallon tyypista riippuen sen eteen tai taakse
 def ChaseTarget(robot, tracked, robot_pose):
-    print(robot + ": Chasing target...")
+    print(str(robot) + ": Chasing target...")
     target = getTarget(robot)
     # Liikutaan pallon taakse
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
@@ -214,7 +214,7 @@ def ChaseTarget(robot, tracked, robot_pose):
 
 # Tahdataan palloon
 def PrepareToHitTarget(robot, tracked, robot_pose):
-    print(robot + ": Preparing to hit target...")
+    print(str(robot) + ": Preparing to hit target...")
     # Kaannytaan kohti palloa
     target = getTarget(robot)
     rotateTowardsTarget(robot, target)
@@ -226,7 +226,7 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
     
 # Jyrataan palloon
 def HitTarget(robot, tracked, robot_pose):
-    print(robot + ": Hitting target...")
+    print(str(robot) + ": Hitting target...")
     # Ajetaan pain
     ramForward(robot)
 
