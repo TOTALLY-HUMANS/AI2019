@@ -198,7 +198,12 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
     rotateTowardsTarget(robot, target)
 
     # Jos ollaan riittavan lahella, jyrataan pain
-    if socketInterface.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, target):
+    socket = None
+    if robot == robot_1_id:
+        socket = SI1
+    if robot == robot_2_id:
+        socket = SI2
+    if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, target):
 
         updateState(robot, RobotState.HitTarget)
     
@@ -211,7 +216,12 @@ def HitTarget(robot, tracked, robot_pose):
     ramForward(robot)
 
     # Pallo karkasi, palataan idlaamaan (ja etsimaan uutta kohdetta)
-    if socketInterface.get_distance(robot) > 30 * centimeter:
+    socket = None
+    if robot == robot_1_id:
+        socket = SI1
+    if robot == robot_2_id:
+        socket = SI2
+    if socket.get_distance(robot) > 30 * centimeter:
 
         # Nollataan kohde
         if robot == robot_1_id:
