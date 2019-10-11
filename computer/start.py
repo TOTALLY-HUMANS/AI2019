@@ -50,10 +50,10 @@ class RobotState(IntEnum):
 
 robot_1_id = 16
 robot_2_id = 17
-robot_1_state : global = RobotState.Idle
-robot_2_state : global = RobotState.Idle
-robot_1_target : global = None
-robot_2_target : global = None
+robot_1_state = RobotState.Idle
+robot_2_state = RobotState.Idle
+robot_1_target = None
+robot_2_target = None
 UltrasonicSensor = None
 own_goal_pose = (0, 0)
 opponent_goal_pose = (1080, 1080)
@@ -158,6 +158,8 @@ def Idle(robot, tracked, robot_pose):
 
 # Robotti etsii kohteen
 def FindTarget(robot, tracked, robot_pose):
+    global robot_1_target
+    global robot_2_target
     print(str(robot) + ": Finding target...")
     if len(tracked) == 0: # Palloja ei loydy, idlataan
         print(str(robot) + ": No balls found, idling")
@@ -198,6 +200,8 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
     
 # Jyrataan palloon
 def HitTarget(robot, tracked, robot_pose):
+    global robot_1_target
+    global robot_2_target
     print(str(robot) + ": Hitting target...")
     # Ajetaan pain
     ramForward(robot)
@@ -216,6 +220,8 @@ def HitTarget(robot, tracked, robot_pose):
 
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
+    global robot_1_state
+    global robot_2_state
     robotStates = {
         0: Idle,
         1: FindTarget,
@@ -241,6 +247,8 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
 
 # Vaihdetaan tilakoneen tilaa
 def updateState(robot, newState):
+    global robot_1_state
+    global robot_2_state
     if robot == robot_1_id:
         robot_1_state = newState
         print(str(robot) + " changes to state " + str(robot_1_state))
@@ -254,6 +262,8 @@ def updateState(robot, newState):
 
 # Luetaan kohde
 def getTarget(robot):
+    global robot_1_target
+    global robot_2_target
     if robot == robot_1_id:
         return robot_1_target
     if robot == robot_2_id:
