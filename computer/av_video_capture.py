@@ -1,7 +1,7 @@
 import av
 import queue
 import threading
-
+#Install pyav using conda install av -c conda-forge
 
 class AvVideoCapture:
 

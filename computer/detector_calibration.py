@@ -13,7 +13,7 @@ import numpy as np
 from enum import Enum
 
 from av_video_capture import AvVideoCapture
-#from video_capture import VideoCapture
+from video_capture import VideoCapture
 
 from ball_detector import BallDetector
 #from aruco_detector import ArucoDetector
@@ -22,7 +22,7 @@ from ball_detector import BallDetector
 from my_robot import drive_commands
 from socket_interface import socketInterface
 
-
+url= "udp://224.0.0.0:1234"
 def downscale_image(img, scale_percent):
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
@@ -37,14 +37,15 @@ def main():
         config = json.load(json_data)
 
     print("Connecting to camera.")
-    #cap = AvVideoCapture(config["url"])
+    #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
-    cap = cv2.VideoCapture('videos/Balls1.ts')
+    cap = cv2.VideoCapture(url)
     print("Initializing ball detector.")
     ball_detector = BallDetector(config["ball_detector"], debug=True)
     try:
         while 1:
             ret, img = cap.read()
+            print(img)
 
             if ret:
 
