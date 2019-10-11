@@ -57,11 +57,12 @@ class BallDetector:
         #pink = self.hough_detect_balls(pink_mask, -1)
 
         balls = [*yellow, *pink]
+        and_mask = cv2.bitwise_or(yellow_mask,pink_mask)
         #balls = pink
         if self.debug:
             self.debug_update(img,yellow_mask,pink_mask, balls)
         
-        return balls
+        return balls, and_mask
     
     def detect_balls_in_keypoints(self,img, kps, value, side):
         half = side/2
