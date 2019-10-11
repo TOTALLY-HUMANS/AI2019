@@ -8,12 +8,9 @@ from test_servo_run import ServoController
 import socket
 
 import os.path
-<<<<<<< HEAD
 mac = '34:F3:9A:CA:C8:3E'
-=======
 
 SC = ServoController()
->>>>>>> af5f9782262304085740fd48862ddfa44b97ba3d
 
 def main():
 	if os.path.isfile("./1"): ID = 1
