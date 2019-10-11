@@ -192,6 +192,9 @@ def ChaseTarget(robot, tracked, robot_pose):
 
 # Tahdataan palloon
 def PrepareToHitTarget(robot, tracked, robot_pose):
+    global SI1
+    global SI2
+
     print(str(robot) + ": Preparing to hit target...")
     # Kaannytaan kohti palloa
     target = getTarget(robot)
@@ -211,6 +214,9 @@ def PrepareToHitTarget(robot, tracked, robot_pose):
 def HitTarget(robot, tracked, robot_pose):
     global robot_1_target
     global robot_2_target
+    global SI1
+    global SI2
+    
     print(str(robot) + ": Hitting target...")
     # Ajetaan pain
     ramForward(robot)
