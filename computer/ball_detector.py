@@ -25,6 +25,12 @@ def merge_keypoints(keypoints, radius):
 
     return result
 
+def downscale_image(img, scale_percent):
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dim = (width, height)
+
+    return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 
 class BallDetector:
 
@@ -140,9 +146,12 @@ class BallDetector:
             print(ball)
             cv2.circle(img, ball.center, ball.radius, color, 2)
             cv2.circle(img, ball.center, 2, color, 2)
-        cv2.imshow('yellow', yellow_mask)
-        cv2.imshow('pink', pink_mask)
-        cv2.imshow('debug', img)
+        y_show = downscale_image(yellow_mask.copy(),50)
+        p_show = downscale_image(pink_mask.copy(),50)
+        i_show = downscale_image(img.copy(),50)
+        cv2.imshow('yellow', y_show)
+        cv2.imshow('pink', p_show)
+        cv2.imshow('debug', i_show)
         key = cv2.waitKey(1)
 
     def create_debug_windows(self):
