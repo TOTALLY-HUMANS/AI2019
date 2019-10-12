@@ -43,8 +43,8 @@ class socketInterface():
         string = str(robo_m).index("DISTANCE:")
       except:
         return
-      if string[0] == '1': dist1 = float(string[10,len(string)])
-      if string[0] == '2': dist2 = float(string[10,len(string)])
+      #if string[0] == '1': dist1 = float(string[10,len(string)])
+      #if string[0] == '2': dist2 = float(string[10,len(string)])
   
   def __del__(self):
     if self.conn is not None:
