@@ -34,29 +34,29 @@ def main():
         data = s.recv(512).decode()
 #		print(data)
 
-           # Normaali ajokomento
-           if data[0] == 'M':
-                split_data = data.split('#')
-                print("r_com ", str(split_data[1]),
-                      " l_com ", str(split_data[2]))
-                r_com = str(split_data[1])
-                l_com = str(split_data[2])
-                data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
-                # if not ser.isOpen():
-                #print("serial not ok")
-                ser.write(data)
+        # Normaali ajokomento
+        if data[0] == 'M':
+            split_data = data.split('#')
+            print("r_com ", str(split_data[1]),
+                    " l_com ", str(split_data[2]))
+            r_com = str(split_data[1])
+            l_com = str(split_data[2])
+            data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
+            # if not ser.isOpen():
+			#print("serial not ok")
+			ser.write(data)
 
-            # ajetaan nytkahdellen yksi askel: komento arduinolle ja viiveen jalkeen arduinolla nolla
-            # Tarvitaanko oma suoraan ajolle ja kaantymiselle, vai riittaako yksi?
-            elif data[0] == 'A':
-                split_data = data.split('#')
-                r_com = str(split_data[1])
-                l_com = str(split_data[2])
-                data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
-                ser.write(data)
-                time.sleep(0.02)  # onko blokkaava viive vaarallinen?
-                data = 'R' + str(0) + 'L' + str(0) + ' '
-                ser.write(data)
+		# ajetaan nytkahdellen yksi askel: komento arduinolle ja viiveen jalkeen arduinolla nolla
+		# Tarvitaanko oma suoraan ajolle ja kaantymiselle, vai riittaako yksi?
+		elif data[0] == 'A':
+			split_data = data.split('#')
+			r_com = str(split_data[1])
+			l_com = str(split_data[2])
+			data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
+			ser.write(data)
+			time.sleep(0.02)  # onko blokkaava viive vaarallinen?
+			data = 'R' + str(0) + 'L' + str(0) + ' '
+			ser.write(data)
 
 #		elif data[0] == 'S':
 #			SC.MoveForward()
