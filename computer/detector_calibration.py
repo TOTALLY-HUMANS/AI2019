@@ -58,7 +58,8 @@ def main():
 
             if ret:
 
-                img = downscale_image(img, config["downscale_p"])
+                img = downscale_image(img, config["downscale_p"]) 
+                # 972 x 972
 
                 balls, mask = ball_detector.detect_balls(img)  
                 mask[mask == 255] = 150
@@ -95,7 +96,9 @@ def main():
 
                 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
                 mask = cv2.dilate(mask, kernel, iterations=10)
-                mask = cv2.resize(mask, (200, 200))
+                mask = cv2.resize(mask, (int(972*0.2), int(972*0.2)))
+                #mask = downscale_image(img, 20)
+                print(mask.shape)
 
                 # find path
                 start_time = time.time()
@@ -105,9 +108,17 @@ def main():
                 path_x = [i[0] for i in path] 
                 path_y = [i[1] for i in path]
                 mask[path_x, path_y] = 125
+                
+                scaled_path = []
+                for index, item in enumerate(path):
+                    if(index%20 == 0):
+                        tuple_item = (item[1]*5, item[0]*5)
+                        scaled_path.append(tuple_item)
+                        cv2.circle(img, tuple_item, 2, (0,0,225))
 
+                print(scaled_path)
                 cv2.imshow('orig', img)
-                cv2.imshow('mask_test', mask)
+                #cv2.imshow('mask_test', mask)
                 key = cv2.waitKey(1)
 
     except:
