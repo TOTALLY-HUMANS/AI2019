@@ -10,25 +10,32 @@ import socket
 import os.path
 mac = '34:F3:9A:CA:C8:3E'
 
+SC = ServoController()
+
 def main():
 	if os.path.isfile("./1"): ID = 1
 	if os.path.isfile("./2"): ID = 2
 	ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
 	USC = UltrasonicCapture()
-#	SC = ServoController()
 	if not ser.isOpen():
 		return
 		#print("cant open serial")
 		#return
-#	s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+<<<<<<< HEAD
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect(('192.168.43.78',50001))
-	message = str(ID) + "DISTANCE:" + str(USC.read())
+	s.connect(('192.168.43.181',50001))
+	m
+=======
+	s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+	s.connect((mac,3))
+	message = ID + "DISTANCE:" + UltrasonicCapture.read()
+	coordinatesForRobotBehindBall
+>>>>>>> 24928b2eabb0d0dc18780ce760a037bad8c930ef
 	while 1:
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
 		#print(data)
-		if data[0] == 'M':
+		if data[0] = 'M':
 			split_data = data.split('#')
 			#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
 			r_com = str(split_data[0])
@@ -37,10 +44,10 @@ def main():
 			#if not ser.isOpen():
 			#print("serial not ok")
 			ser.write(data)
-#		if data[0] == 'S':
-#			SC.MoveForward()
-#		if data[0] == 'R':
-#			SC.MoveBackward()
+		if data[0] = 'S':
+			SC.MoveForward()
+		if data[0] = 'R':
+			SC.MoveBackward()
 
 
 

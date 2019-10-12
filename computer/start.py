@@ -11,7 +11,7 @@ from cv2 import aruco
 
 from scipy.spatial import distance
 
-from enum import Enum
+from enum import IntEnum
 
 from av_video_capture import AvVideoCapture
 from video_capture import VideoCapture
@@ -41,18 +41,23 @@ radius_range = [13, 16]
 centimeter = 10
 
 # ROBOT STATE DEFINITIONS
-class RobotState(Enum):
+class RobotState(IntEnum):
     Idle = 0
     FindTarget = 1
     ChaseTarget = 2
     PrepareToHitTarget = 3
     HitTarget = 4
+
 robot_1_id = 16
 robot_2_id = 17
 robot_1_state = RobotState.Idle
 robot_2_state = RobotState.Idle
 robot_1_target = None
 robot_2_target = None
+robot_1_target_id = None
+robot_2_target_id = None
+SI1 = None
+SI2 = None
 UltrasonicSensor = None
 own_goal_pose = (0, 0)
 opponent_goal_pose = (1080, 1080)
@@ -60,6 +65,8 @@ ROBOT_SIZE = 100
 
 # MAIN LOOPERO
 def main():
+    global SI1
+    global SI2
     print("Loading configuration.")
     with open('config.json') as json_data:
         config = json.load(json_data)
@@ -96,8 +103,8 @@ def main():
                 visualize_detected(img, tracked_balls, corners, ids, positions)
                 
                 # Run robot AI
-                evaluateRobotState(16, tracked_balls, positions)
-                #evaluateRobotState(17, tracked_balls, positions)
+                evaluateRobotState(robot_1_id, tracked_balls, positions)
+                #evaluateRobotState(robot_2_id, tracked_balls, positions)
 
             time2 = time.time()
             frame_time = (time2-time1)*1000
@@ -148,12 +155,102 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
 
 ### HERE BEGINS ROBOT AI ###
 
+# STATES
+
+# Robotti idlaa oletustilassaan, ja koettaa loytaa kohteen
+def Idle(robot, tracked, robot_pose):
+    print(str(robot) + ": Idling")
+    updateState(robot, RobotState.FindTarget)
+
+# Robotti etsii kohteen
+def FindTarget(robot, tracked, robot_pose):
+    global robot_1_target
+    global robot_2_target
+    global robot_1_target_id
+    global robot_2_target_id
+    print(str(robot) + ": Finding target...")
+    if len(tracked) == 0: # Palloja ei loydy, idlataan
+        print(str(robot) + ": No balls found, idling")
+        updateState(robot, RobotState.Idle)
+        return
+    if robot == robot_1_id: # Ykkosrobo jahtaa punaista
+        key, ball = getClosestBall(tracked, robot_pose, -1)
+        robot_1_target = target = ball
+        robot_1_target_id = key
+    if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
+        key, ball = getClosestBall(tracked, robot_pose, 1)
+        robot_2_target = target = ball
+        robot_2_target_id = key
+    if target is not None:
+        print(str(robot) + ": Starting chase...")
+        updateState(robot, RobotState.ChaseTarget) # Kohde loytyy, lahdetaan peraan
+    else:
+        print(str(robot) + ": No suitable ball found, idling...")
+        updateState(robot, RobotState.Idle) # Kohdetta ei loydy, idlataan
+
+# Ajetaan pallon tyypista riippuen sen eteen tai taakse
+def ChaseTarget(robot, tracked, robot_pose):
+    id_number, target = getTarget(robot)
+    print(str(robot) + ": Chasing target: " + str(id_number))
+    # Liikutaan pallon taakse
+    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
+    # Jos ollaan riittavan lahella palloa, tahdataan siihen
+    #if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
+    #    updateState(robot, RobotState.PrepareToHitTarget)
+
+# Tahdataan palloon
+def PrepareToHitTarget(robot, tracked, robot_pose):
+    global SI1
+    global SI2
+
+    print(str(robot) + ": Preparing to hit target...")
+    # Kaannytaan kohti palloa
+    id_number, target = getTarget(robot)
+    rotateTowardsTarget(robot, target)
+
+    # Jos ollaan riittavan lahella, jyrataan pain
+    socket = None
+    if robot == robot_1_id:
+        socket = SI1
+    if robot == robot_2_id:
+        socket = SI2
+    socket.servo_forward()
+    if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
+
+        updateState(robot, RobotState.HitTarget)
+    
+# Jyrataan palloon
+def HitTarget(robot, tracked, robot_pose):
+    global robot_1_target
+    global robot_2_target
+    global SI1
+    global SI2
+
+    print(str(robot) + ": Hitting target...")
+    # Ajetaan pain
+    ramForward(robot)
+
+    # Pallo karkasi, palataan idlaamaan (ja etsimaan uutta kohdetta)
+    socket = None
+    if robot == robot_1_id:
+        socket = SI1
+    if robot == robot_2_id:
+        socket = SI2
+    if socket.get_distance(robot) > 30 * centimeter:
+
+        # Nollataan kohde
+        if robot == robot_1_id:
+            robot_1_target = None
+        if robot == robot_2_id:
+            robot_2_target = None
+        updateState(robot, RobotState.Idle)
+
+
+
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
 def evaluateRobotState(robot, ball_positions, robot_positions):
-    if robot == 16:
-        currentRobotState = robot_1_state
-    if robot == 17:
-        currentRobotState = robot_2_state
+    global robot_1_state
+    global robot_2_state
     robotStates = {
         0: Idle,
         1: FindTarget,
@@ -165,89 +262,43 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     pose_found = False
     for pos in robot_positions:
         if pos[3] == robot:
-            robot_pose = pos
+            robot_pose = (pos[0], pos[1], pos[2])
             pose_found = True
     if not pose_found:
         print(str(robot) + ": No robot found, idling")
         updateState(robot, RobotState.Idle)
-    robotStates[currentRobotState](robot, ball_positions, robot_pose)
+    if robot == robot_1_id:
+        print(str(robot) + ": Running state " + str(robot_1_state))
+        robotStates[robot_1_state](robot, ball_positions, robot_pose)
+    if robot == robot_2_id:
+        print(str(robot) + ": Running state " + str(robot_2_state))
+        robotStates[robot_2_state](robot, ball_positions, robot_pose)
 
 # Vaihdetaan tilakoneen tilaa
 def updateState(robot, newState):
+    global robot_1_state
+    global robot_2_state
     if robot == robot_1_id:
         robot_1_state = newState
+        print(str(robot) + " changes to state " + str(robot_1_state))
     if robot == robot_2_id:
         robot_2_state = newState
+        print(str(robot) + " changes to state " + str(robot_2_state))
 
-# STATES
 
-# Robotti idlaa oletustilassaan, ja koettaa loytaa kohteen
-def Idle(robot, tracked, robot_pose):
-    print(str(robot) + ": Idling")
-    updateState(robot, RobotState.FindTarget)
-
-# Robotti etsii kohteen
-def FindTarget(robot, tracked, robot_pose):
-    print(str(robot) + ": Finding target...")
-    if len(tracked) == 0: # Palloja ei loydy, idlataan
-        print(str(robot) + ": No balls found, idling")
-        updateState(robot, RobotState.Idle)
-        return
-    if robot == robot_1_id: # Ykkosrobo jahtaa punaista
-        robot_1_target = target = getClosestBall(tracked, robot_pose, -1)
-    if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
-        robot_2_target = target = getClosestBall(tracked, robot_pose, 1)
-    if target is not None:
-        updateState(robot, RobotState.ChaseTarget) # Kohde loytyy, lahdetaan peraan
-    else:
-        updateState(robot, RobotState.Idle) # Kohdetta ei loydy, idlataan
-
-# Ajetaan pallon tyypista riippuen sen eteen tai taakse
-def ChaseTarget(robot, tracked, robot_pose):
-    print(str(robot) + ": Chasing target...")
-    target = getTarget(robot)
-    # Liikutaan pallon taakse
-    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
-    # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
-        updateState(robot, RobotState.PrepareToHitTarget)
-
-# Tahdataan palloon
-def PrepareToHitTarget(robot, tracked, robot_pose):
-    print(str(robot) + ": Preparing to hit target...")
-    # Kaannytaan kohti palloa
-    target = getTarget(robot)
-    rotateTowardsTarget(robot, target)
-
-    # Jos ollaan riittavan lahella, jyrataan pain
-    if socketInterface.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, target):
-
-        updateState(robot, RobotState.HitTarget)
-    
-# Jyrataan palloon
-def HitTarget(robot, tracked, robot_pose):
-    print(str(robot) + ": Hitting target...")
-    # Ajetaan pain
-    ramForward(robot)
-
-    # Pallo karkasi, palataan idlaamaan (ja etsimaan uutta kohdetta)
-    if socketInterface.get_distance(robot) > 30 * centimeter:
-
-        # Nollataan kohde
-        if robot == robot_1_id:
-            robot_1_target = None
-        if robot == robot_2_id:
-            robot_2_target = None
-        updateState(robot, RobotState.Idle)
 
 # HELPER METHODS
 
 # Luetaan kohde
 def getTarget(robot):
+    global robot_1_target
+    global robot_2_target
+    global robot_1_target_id
+    global robot_2_target_id
     if robot == robot_1_id:
-        return robot_1_target
+        return robot_1_target_id, robot_1_target
     if robot == robot_2_id:
-        return robot_2_target
+        return robot_2_target_id, robot_2_target
 
 """
 Return coordinates behind the ball based on the color of the ball and the position of the goal
@@ -256,6 +307,9 @@ Input:
     a ball (x, y, ballType)
 """
 def coordinatesForRobotBehindBall(ball):
+    global opponent_goal_pose
+    global own_goal_pose
+
     x,y = ball.center
     color = ball.color
 
@@ -279,14 +333,16 @@ def isNearTarget(robot_pose, target):
 
 def getClosestBall(tracked, robot_pose, ballType):
     chosenBall = None
+    chosenBallId = -1
     shortestDistance = 100000
-    for ball in tracked.values():
+    for key, ball in tracked.items():
         if (ball.color == ballType):
-            dist = distance.euclidean((ball[0], ball[1]), (robot_pose[0], robot_pose[1]))
+            dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
             if (dist < shortestDistance):
                 shortestDistance = dist
                 chosenBall = ball
-    return chosenBall
+                chosenBallId = key
+    return chosenBallId, chosenBall
 
 # ROBOTIN LIIKKUMINEN
 
@@ -299,6 +355,9 @@ def rotateTowardsTarget(robot, target):
     # Kaannytaan kohti targetia
 
 def moveTowardsTarget(robot, target_pose, robot_pose):
+    global SI1
+    global SI2
+
     target_x = target_pose[0]
     target_y = target_pose[1]
     robot_x = robot_pose[0]

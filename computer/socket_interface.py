@@ -20,8 +20,14 @@ class socketInterface():
     t.start()
 
   def send_command(self, r_com, l_com):
-    command = str(int(r_com))+"#"+str(int(l_com))
+    command = "M" + str(int(r_com))+"#"+str(int(l_com))
     self.conn.send(command.encode())
+
+  def servo_forward(self):
+    self.conn.send("S".encode())
+
+  def servo_backward(self):
+    self.conn.send("R".encode())
     
   def get_distance(self, robot):
     if robot == 15: return dist1
@@ -39,6 +45,7 @@ class socketInterface():
       if string[0] == '1': dist1 = float(string[10,len(string)])
       if string[0] == '2': dist2 = float(string[10,len(string)])
   
-  #def __del__(self):
-  #  self.conn.close()
+  def __del__(self):
+    if self.conn is not None:
+      self.conn.close()
 
