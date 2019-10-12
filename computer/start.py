@@ -491,13 +491,13 @@ def coordinatesForRobotBehindBall(ball,correction):
     pos_x = position_behind_ball[0]
     pos_y = position_behind_ball[1]
     if pos_x <=  0:
-        pos_x += correction
+        pos_x = correction
     if pos_y <= 0
-        pos_y += correction
+        pos_y = correction
     if pos_x >= 972:
-        pos_x -= correction
+        pos_x = -correction
     if pos_y >= 972:
-        pos_y -= correction
+        pos_y = -correction
     return (pos_x,pos_y)
 
 # Sama kuin ylempi mutta yrittää ajaa suoraan palloon
