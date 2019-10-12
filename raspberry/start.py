@@ -22,14 +22,14 @@ def main():
 		#return
 #	s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect(('192.168.1.130',50001))
-	message = str(ID) + "DISTANCE:" + str(USC.read())
-#	message = "test"
+	s.connect(('192.168.1.131',50001))
+	#message = str(ID) + "DISTANCE:" + str(USC.read())
+	message = "test"
 	while 1:
 		#print("while")
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
-		#print(data)
+#		print(data)
 		
 		##Normaali ajokomento
 		if data[0] == 'M':
