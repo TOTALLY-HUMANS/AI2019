@@ -370,7 +370,7 @@ def ChaseTarget(robot, tracked, robot_pose):
     moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
     if isNearTarget(robot_pose, coordinatesForBall(target), 20):
-        updateState(robot, RobotState.TurnTowardsTarget)
+        updateState(robot, RobotState.PushBallToGoal)
 
 
 # Pusketaan pallo maaliin
@@ -555,7 +555,7 @@ def getClosestBall(tracked, robot_pose, ignore_ball):
     shortestDistance = 100000
     for key, ball in tracked.items():
         if key is not ignore_ball:
-            if distance.euclidean(ball.center, own_goal_pose) > 60 * centimeter and distance.euclidean(ball.center, opponent_goal_pose) > 60 * centimeter
+            if distance.euclidean(ball.center, own_goal_pose) > (60*centimeter) and distance.euclidean(ball.center, opponent_goal_pose) > (60*centimeter):
                 dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
                 if (dist < shortestDistance):
                     shortestDistance = dist
