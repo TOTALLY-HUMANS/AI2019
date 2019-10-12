@@ -555,7 +555,7 @@ def getClosestBall(tracked, robot_pose, ignore_ball):
     shortestDistance = 100000
     for key, ball in tracked.items():
         if key is not ignore_ball:
-            if distance.euclidean(ball.center, own_goal_pose) > 60 and distance.euclidean(ball.center, opponent_goal_pose) > 60
+            if distance.euclidean(ball.center, own_goal_pose) > 60 * centimeter and distance.euclidean(ball.center, opponent_goal_pose) > 60 * centimeter
                 dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
                 if (dist < shortestDistance):
                     shortestDistance = dist
