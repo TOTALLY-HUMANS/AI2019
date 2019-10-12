@@ -366,11 +366,11 @@ def PushBallToGoal(robot, tracked, robot_pose):
     #rotateTowardsTarget(robot, target)
     if target.color == -1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, opponent_goal_pose, 30):
+        if isNearTarget(robot_pose, opponent_goal_pose, 50):
             updateState(robot, RobotState.Idle)
     if target.color == 1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, own_goal_pose, 30):
+        if isNearTarget(robot_pose, own_goal_pose, 50):
             updateState(robot, RobotState.Idle)
 
     # Jos ollaan riittavan lahella, jyrataan pain
