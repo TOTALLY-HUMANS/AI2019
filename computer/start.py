@@ -69,6 +69,7 @@ own_goal_pose = (0, 0)
 opponent_goal_pose = (972, 972)
 ROBOT_SIZE = 100
 mask = None
+wall_correction = 20
 
 # MAIN LOOPERO
 def main():
@@ -201,7 +202,7 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
         #Draw a speed vector from the ball
         speed = tuple(np.array(val.center)+np.array(val.speed))
         cv2.line(img, val.center, (int(speed[0]),int(speed[1])),(0,0,255),2)
-        coordinates = coordinatesForRobotBehindBall(val)
+        coordinates = coordinatesForRobotBehindBall(val,wall_correction)
         cv2.circle(img, (int(coordinates[0]), int(coordinates[1])) , 2, (255, 0, 0), 2)
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(img, str(key), val.center, font, 1, (0, 255, 0), 2, cv2.LINE_AA)
@@ -338,7 +339,7 @@ def ChaseTarget(robot, tracked, robot_pose):
     #if robot == robot_2_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
-    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
+    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target,wall_correction), robot_pose)
     found = False
     for key, ball in tracked.items():
         if robot == robot_1_id:
@@ -352,7 +353,7 @@ def ChaseTarget(robot, tracked, robot_pose):
         return
 
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 10):
+    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target,wall_correction), 10):
         updateState(robot, RobotState.PushBallToGoal)
 
 # Pusketaan pallo maaliin
@@ -471,7 +472,7 @@ Return coordinates behind the ball based on the color of the ball and the positi
 Input: 
     a ball (x, y, ballType)
 """
-def coordinatesForRobotBehindBall(ball):
+def coordinatesForRobotBehindBall(ball,correction):
     global opponent_goal_pose
     global own_goal_pose
 
@@ -487,8 +488,17 @@ def coordinatesForRobotBehindBall(ball):
     vector_to_goal = np.array([goal_pose[0] - x, goal_pose[1] - y])
     vector_magnitude = np.linalg.norm(vector_to_goal)
     position_behind_ball = np.array([x, y]) - (vector_to_goal/vector_magnitude) * ROBOT_SIZE
-    
-    return position_behind_ball
+    pos_x = position_behind_ball[0]
+    pos_y = position_behind_ball[1]
+    if pos_x <=  0:
+        pos_x += correction
+    if pos_y <= 0
+        pos_y += correction
+    if pos_x >= 972:
+        pos_x -= correction
+    if pos_y >= 972:
+        pos_y -= correction
+    return (pos_x,pos_y)
 
 # Sama kuin ylempi mutta yrittää ajaa suoraan palloon
 def coordinatesForBall(ball):
