@@ -555,11 +555,12 @@ def getClosestBall(tracked, robot_pose, ignore_ball):
     shortestDistance = 100000
     for key, ball in tracked.items():
         if key is not ignore_ball:
-            dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
-            if (dist < shortestDistance):
-                shortestDistance = dist
-                chosenBall = ball
-                chosenBallId = key
+            if distance.euclidean(ball.center, own_goal_pose) > 60 and distance.euclidean(ball.center, opponent_goal_pose) > 60
+                dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
+                if (dist < shortestDistance):
+                    shortestDistance = dist
+                    chosenBall = ball
+                    chosenBallId = key
     return chosenBallId, chosenBall
 
 def updateBallCoordinates(robot, tracked):
