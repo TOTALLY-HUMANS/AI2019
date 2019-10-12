@@ -120,9 +120,10 @@ def main():
                 visualize_detected(img, tracked_balls, corners, ids, aruco_positions)
                 print(aruco_positions)
                 # Run robot AI
-                #evaluateRobotState(robot_1_id, tracked_balls, positions)
+                evaluateRobotState(robot_1_id, tracked_balls, aruco_positions)
                 #evaluateRobotState(robot_2_id, tracked_balls, positions)
-                robot_pose = (0.0, 0.0, 0.0)
+                
+                '''robot_pose = (0.0, 0.0, 0.0)
                 for key,pos in aruco_positions.items():
 
                     if pos[3] == 16:
@@ -149,7 +150,7 @@ def main():
                         r_com = 170*r_com #255*r_com
                         l_com = 170*l_com #255*l_com
                         print(l_com,r_com)
-                        '''
+                        
                         if abs(r_com) < brakezone:
                             r_com = 0
                         elif abs(r_com) < deadzone:
@@ -164,9 +165,9 @@ def main():
                                 l_com = l_com - deadzone
                             if r_com > 0:
                                 l_com = l_com + deadzone
-                        '''
+                        
                     # ohjauskomento sokettiin
-                    SI1.send_command(r_com, l_com)
+                    SI1.send_command(r_com, l_com)'''
             time2 = time.time()
             frame_time = (time2-time1)*1000
             if frame_time != 0:
@@ -293,7 +294,7 @@ def ChaseTarget(robot, tracked, robot_pose):
     id_number, target = getTarget(robot)
     print(str(robot) + ": Chasing target: " + str(id_number))
     # Liikutaan pallon taakse
-    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
+    moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
     #if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
     #    updateState(robot, RobotState.PrepareToHitTarget)
@@ -360,8 +361,8 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
-    for pos in robot_positions:
-        if pos[3] == robot:
+    for key, pos in robot_positions.items():
+        if key == robot:
             robot_pose = (pos[0], pos[1], pos[2])
             pose_found = True
     if not pose_found:
@@ -425,6 +426,17 @@ def coordinatesForRobotBehindBall(ball):
     
     return position_behind_ball
 
+# Sama kuin ylempi mutta yrittää ajaa suoraan palloon
+def coordinatesForBall(ball):
+    global opponent_goal_pose
+    global own_goal_pose
+
+    x,y = ball.center
+    color = ball.color
+    position_behind_ball = np.array([x, y])
+    
+    return position_behind_ball
+
 def isNearTarget(robot_pose, target):
     dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
     if dist < centimeter * 10:
@@ -458,7 +470,7 @@ def moveTowardsTarget(robot, target_pose, robot_pose):
     global SI1
     global SI2
 
-    target_x = target_pose[0]
+    '''target_x = target_pose[0]
     target_y = target_pose[1]
     robot_x = robot_pose[0]
     robot_y = robot_pose[1]
@@ -496,6 +508,26 @@ def moveTowardsTarget(robot, target_pose, robot_pose):
     """
     print("r_com: "+str(r_com))
     print("l_com: "+str(l_com))
+    '''
+
+    ball_x = target_pose[0]
+    ball_y = target_pose[1]
+    robot_x = robot_pose[0]
+    robot_y = robot_pose[1]
+    robot_yaw = robot_pose[2]
+
+    # ohjauskomento
+    r_com = 0.0
+    l_com = 0.0
+    deadzone = 90
+    brakezone = 50
+
+    r_com, l_com = drive_commands(
+        ball_x, ball_y, robot_x, robot_y, robot_yaw)
+    r_com = 170*r_com #255*r_com
+    l_com = 170*l_com #255*l_com
+    print(l_com,r_com)
+
     # ohjauskomento sokettiin
     if robot == robot_1_id:
         SI1.send_command(r_com, l_com)
