@@ -107,7 +107,7 @@ def main():
                 positions = aruco_detector.get_positions(corners, ids)
                 aruco_positions = aruco_tracker.update(positions)
 
-                mask = evaluateStageMask(mask, positions)
+                mask = evaluateStageMask(mask, positionsmask, 200)
                 # find path
                 start_time = time.time()
                 path = astar(mask, (0, 0), (190,190))
@@ -216,7 +216,7 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
     key = cv2.waitKey(1)
 
 
-def evaluateStageMask(mask, positions):
+def evaluateStageMask(mask, positions, resize_side):
     # remove balls
     mask[mask == 255] = 0
 
@@ -250,7 +250,7 @@ def evaluateStageMask(mask, positions):
 
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
     mask = cv2.dilate(mask, kernel, iterations=10)
-    mask = cv2.resize(mask, (200, 200))
+    mask = cv2.resize(mask, (resize_side, resize_side))
 
     return mask
 
