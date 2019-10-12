@@ -53,7 +53,7 @@ if __name__ == '__main__':
             print ("Measured Distance = %.1f cm" % dist)
             time.sleep(1)
     except KeyboardInterrupt:
-        print('Stopped by user')
+        print('Stopped by user aaaaaaaaaaaaaaaa')
         GPIO.cleanup() 
     # Reset by pressing CTRL + C
     except Exception as e:

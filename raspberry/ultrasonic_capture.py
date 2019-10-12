@@ -1,10 +1,10 @@
-import cv2, queue, threading, time
+import  queue, threading, time
 import RPi.GPIO as GPIO
 import time
 
 class UltrasonicCapture:
 
-  def __init__(self, name):
+  def __init__(self):
     self.q = queue.Queue()
     t = threading.Thread(target=self._reader)
     t.daemon = True
@@ -35,7 +35,6 @@ class UltrasonicCapture:
         time.sleep(0.00001)
 
         GPIO.output(PIN_TRIGGER, GPIO.LOW)
-      
         pulse_start_time = 0
         pulse_end_time = 0
 
