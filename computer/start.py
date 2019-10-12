@@ -290,11 +290,11 @@ def FindTarget(robot, tracked, robot_pose):
         updateState(robot, RobotState.Idle)
         return
     if robot == robot_1_id: # Ykkosrobo jahtaa punaista
-        key, ball = getClosestBall(tracked, robot_pose, -1)
+        key, ball = getClosestBall(tracked, robot_pose, robot_2_target_id)
         robot_1_target = target = ball
         robot_1_target_id = key
     if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
-        key, ball = getClosestBall(tracked, robot_pose, 1)
+        key, ball = getClosestBall(tracked, robot_pose, robot_1_target_id)
         robot_2_target = target = ball
         robot_2_target_id = key
     if target is not None:
@@ -549,12 +549,12 @@ def isPointingTowards(robot_pose, target_pose):
         return True
     return False
 
-def getClosestBall(tracked, robot_pose, ballType):
+def getClosestBall(tracked, robot_pose, ignore_ball):
     chosenBall = None
     chosenBallId = -1
     shortestDistance = 100000
     for key, ball in tracked.items():
-        if (ball.color == ballType):
+        if key is not ignore_ball:
             dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
             if (dist < shortestDistance):
                 shortestDistance = dist
