@@ -73,6 +73,8 @@ def main():
     SI1 = socketInterface()
     #SI2 = socketInterface()
 
+  
+    count = 0
     print("Connecting to camera.")
     cap = AvVideoCapture(config["url"])
     #cap = VideoCapture(url)
@@ -88,9 +90,9 @@ def main():
         while 1:
             time1 = time.time()
             ret, img = cap.read()
-
-            if ret:
-
+            count += 1
+            if ret and count%2==0:
+                
                 
                 img = downscale_image(img, 90)
 
@@ -367,29 +369,35 @@ def moveTowardsTarget(robot, target_pose, robot_pose):
     # ohjauskomento
     r_com = 0.0
     l_com = 0.0
-    deadzone = 90
-    brakezone = 50
-
+    deadzone = 90.0
+    brakezone = 50.0
+    print("r_com: "+str(r_com))
+    print("l_com: "+str(l_com))
     r_com, l_com = drive_commands(
         target_x, target_y, robot_x, robot_y, robot_yaw)
-    r_com = 150*r_com #255*r_com
-    l_com = 150*l_com #255*l_com
+    r_com = 70.0*r_com #255*r_com
+    l_com = 70.0*l_com #255*l_com
+    print("r_com: "+str(r_com))
+    print("l_com: "+str(l_com))
 
+    """
     if abs(r_com) < brakezone:
-        r_com = 0
+        r_com = 0.0
     elif abs(r_com) < deadzone:
-        if r_com < 0:
+        if r_com < 0.0:
             r_com = r_com - deadzone
-        if r_com > 0:
+        if r_com > 0.0:
             r_com = r_com + deadzone
     if abs(l_com) < brakezone:
-        l_com = 0
+        l_com = 0.0
     elif abs(l_com) < deadzone:
-        if l_com < 0:
+        if l_com < 0.0:
             l_com = l_com - deadzone
-        if r_com > 0:
+        if r_com > 0.0:
             l_com = l_com + deadzone
-
+    """
+    print("r_com: "+str(r_com))
+    print("l_com: "+str(l_com))
     # ohjauskomento sokettiin
     if robot == robot_1_id:
         SI1.send_command(r_com, l_com)

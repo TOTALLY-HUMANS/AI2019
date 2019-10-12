@@ -27,7 +27,7 @@ def main():
 		s.sendall(message.encode())
 		data = s.recv(512).decode()
 		#print(data)
-		if data[0] = 'M':
+		if data[0] == 'M':
 			split_data = data.split('#')
 			#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
 			r_com = str(split_data[0])
@@ -36,9 +36,9 @@ def main():
 			#if not ser.isOpen():
 			#print("serial not ok")
 			ser.write(data)
-		if data[0] = 'S':
+		if data[0] == 'S':
 			SC.MoveForward()
-		if data[0] = 'R':
+		if data[0] == 'R':
 			SC.MoveBackward()
 
 
