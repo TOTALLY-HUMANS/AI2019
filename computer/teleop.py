@@ -17,28 +17,36 @@ def setup_socket():
 def main():
 	
 	# message form for the socket communications "rightcomman#leftcommand#, e.g. "-100#100"
-	speed = 100
+	speed = 0
+	step = 5
 	while True:
 		command = "0#0"
 		button_pressed = False
-		if keyboard.is_pressed('w'):
-      	  		command = "M" + str(speed)+"#"+str(speed)
-			button_pressed = True
-		if keyboard.is_pressed('a'):
-                        command = "M" + str(-speed)+"#"+str(speed)
-                        button_pressed = True
+    if keyboard.is_pressed('w'):
+		  command = "M" + str(speed)+"#"+str(speed)
+      button_pressed = True
+    if keyboard.is_pressed('a'):
+      command = "M" + str(-speed)+"#"+str(speed)
+      button_pressed = True
 
-    		if keyboard.is_pressed('s'):
-                        command = "M" + str(-speed)+"#"+str(-speed)
-                        button_pressed = True
+    if keyboard.is_pressed('s'):
+      command = "M" + str(-speed)+"#"+str(-speed)
+      button_pressed = True
 
-    		if keyboard.is_pressed('d'):
-                        command = "M" + str(speed)+"#"+str(-speed)
-                        button_pressed = True
+    if keyboard.is_pressed('d'):
+      command = "M" + str(speed)+"#"+str(-speed)
+      button_pressed = True
 
-		if keyboard.is_pressed('h'):
-                        command = "M0#0"
-                        button_pressed = True
+    if keyboard.is_pressed('h'):
+      command = "M0#0"
+      button_pressed = True
+
+    if keyboard.is_pressed('p'):
+      speed += step
+      print("speed: "+str(speed))
+    if keyboard.is_pressed('n'):
+      speed -= step
+      print("speed: "+str(speed))
 
 		if button_pressed:
 			time.sleep(0.5)
