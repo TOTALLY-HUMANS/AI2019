@@ -111,7 +111,7 @@ def main():
                 positions = aruco_detector.get_positions(corners, ids)
                 aruco_positions = aruco_tracker.update(positions)
 
-                mask = evaluateStageMask(mask, positions, 200)
+                #mask = evaluateStageMask(mask, positions, 200)
 
                 # find path
                 start_time = time.time()
@@ -122,7 +122,7 @@ def main():
                 #mask[path_x, path_y] = 125
                 
                 visualize_detected(img, tracked_balls, corners, ids, aruco_positions)
-                print(aruco_positions)
+                #print(aruco_positions)
                 # Run robot AI
                 evaluateRobotState(robot_1_id, tracked_balls, aruco_positions)
                 #evaluateRobotState(robot_2_id, tracked_balls, positions)
@@ -294,6 +294,7 @@ def FindTarget(robot, tracked, robot_pose):
         robot_2_target_id = key
     if target is not None:
         print(str(robot) + ": Starting chase...")
+        """
         if robot == robot_1_id:
             path = astar(mask,
                 (int(robot_pose[0] * 0.2), int(robot_pose[1] * 0.2)),
@@ -312,6 +313,7 @@ def FindTarget(robot, tracked, robot_pose):
         if robot == robot_2_id:
             robot_2_path = astar(mask, robot_pose, target.center)
             robot_2_path_current_node = 1
+        """
         updateState(robot, RobotState.ChaseTarget) # Kohde loytyy, lahdetaan peraan
     else:
         print(str(robot) + ": No suitable ball found, idling...")
@@ -326,21 +328,21 @@ def ChaseTarget(robot, tracked, robot_pose):
 
     id_number, target = getTarget(robot)
     print(str(robot) + ": Chasing target: " + str(id_number))
-    # ASTAR _______ EPÄKOMMENTOIDAAN JOS KÄYTETÄÄN
+    # ASTAR _______ EPaKOMMENTOIDAAN JOS KaYTETaaN
     # Liikutaan pallon taakse
     #if robot == robot_1_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_1_path[robot_1_path_current_node]))
     #    moveTowardsTarget(robot, robot_1_path[robot_1_path_current_node], robot_pose)
-    #    if isNearTarget(robot_pose, robot_1_path[robot_1_path_current_node]): # Saavutettiin edellinen node, siirrytään seuraavaan
+    #    if isNearTarget(robot_pose, robot_1_path[robot_1_path_current_node]): # Saavutettiin edellinen node, siirrytaan seuraavaan
     #        robot_1_path_current_node = robot_1_path_current_node + 1
-    #        if robot_1_path_current_node >= len(robot_1_path): # Lähellä palloa, siirrytään elämässä eteenpäin
+    #        if robot_1_path_current_node >= len(robot_1_path): # Lahella palloa, siirrytaan elamassa eteenpain
     #            updateState(robot, RobotState.FindTarget)
     #if robot == robot_2_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 10):
+    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 3):
         updateState(robot, RobotState.PushBallToGoal)
 
 # Pusketaan pallo maaliin
@@ -478,7 +480,7 @@ def coordinatesForRobotBehindBall(ball):
     
     return position_behind_ball
 
-# Sama kuin ylempi mutta yrittää ajaa suoraan palloon
+# Sama kuin ylempi mutta yrittaa ajaa suoraan palloon
 def coordinatesForBall(ball):
     global opponent_goal_pose
     global own_goal_pose
