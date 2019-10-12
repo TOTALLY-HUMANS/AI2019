@@ -326,6 +326,10 @@ def FindTarget(robot, tracked, robot_pose):
 
 # Ajetaan pallon tyypista riippuen sen eteen tai taakse
 def ChaseTarget(robot, tracked, robot_pose):
+    global robot_1_target_id
+    global robot_2_target_id
+    global robot_1_id
+    global robot_2_id
     #global robot_1_path
     #global robot_1_path_current_node
     #global robot_2_path
@@ -347,22 +351,24 @@ def ChaseTarget(robot, tracked, robot_pose):
     #if robot == robot_2_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
-    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target,wall_correction), robot_pose)
     found = False
+    for key in tracked.items():
+        print("Ball available: " + str(key))
     for key, ball in tracked.items():
         if robot == robot_1_id:
-            if key == robot_1_target:
+            if str(key) == str(robot_1_target_id):
                 found = True
         if robot == robot_2_id:
-            if key == robot_2_target:
+            if str(key) == str(robot_2_target_id):
                 found = True
     if not found:
         print(str(robot) + ": Lost ball while chasing it, picking new target")
         updateState(robot, RobotState.FindTarget)
         return
 
+    updateBallCoordinates(robot, tracked)
+    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target,wall_correction), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-
     if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target,wall_correction), 10):
         updateState(robot, RobotState.TurnTowardsTarget)
 
@@ -375,12 +381,12 @@ def PushBallToGoal(robot, tracked, robot_pose):
     print(str(robot) + ": Pushing ball to goal")
     id_number, target = getTarget(robot)
     if target.color == -1:
-        moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, opponent_goal_pose, 50):
-            updateState(robot, RobotState.Idle)
-    if target.color == 1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
         if isNearTarget(robot_pose, own_goal_pose, 50):
+            updateState(robot, RobotState.Idle)
+    if target.color == 1:
+        moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
+        if isNearTarget(robot_pose, opponent_goal_pose, 50):
             updateState(robot, RobotState.Idle)
 
     # Jos ollaan riittavan lahella, jyrataan pain
@@ -402,6 +408,7 @@ def TurnTowardsTarget(robot, tracked, robot_pose):
     global SI2
 
     print(str(robot) + ": Rotating towards target")
+    id_number, target = getTarget(robot)
     if target.color == -1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose, 0)
         if isPointingTowards(robot_pose, opponent_goal_pose):
@@ -495,9 +502,9 @@ def coordinatesForRobotBehindBall(ball,correction):
     if pos_y <= 0:
         pos_y = correction
     if pos_x >= 972:
-        pos_x = -correction
+        pos_x = 972-correction
     if pos_y >= 972:
-        pos_y = -correction
+        pos_y = 972-correction
     return (pos_x,pos_y)
 
 
@@ -517,6 +524,21 @@ def isNearTarget(robot_pose, target, distanceInCentimeters):
     if dist < centimeter * distanceInCentimeters:
         return True
     return False
+
+#pi to pi
+def normalize_angle(angle):
+    if  angle < -2.0*math.pi or angle > 2.0*math.pi:
+        n   = math.floor(angle/(2.0*math.pi))
+        angle = angle - n*(2.0*math.pi)
+    
+
+    if angle > math.pi:
+        angle = angle - (2.0*math.pi)
+
+    if angle < -math.pi:
+        angle = angle + (2.0*math.pi)
+
+    return angle
 
 def isPointingTowards(robot_pose, target_pose):
     DEG2RAD = math.pi/180.0
@@ -539,6 +561,19 @@ def getClosestBall(tracked, robot_pose, ballType):
                 chosenBall = ball
                 chosenBallId = key
     return chosenBallId, chosenBall
+
+def updateBallCoordinates(robot, tracked):
+    global robot_1_id
+    global robot_1_target
+    global robot_2_id
+    global robot_2_target
+    for key, ball in tracked.items():
+        if robot == robot_1_id:
+            if key == robot_1_target_id:
+                robot_1_target = ball
+        if robot == robot_2_id:
+            if key == robot_2_target_id:
+                robot_2_target = ball
 
 # ROBOTIN LIIKKUMINEN
 
