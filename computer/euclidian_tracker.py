@@ -26,6 +26,7 @@ class EuclidianTracker():
 
     def update(self, balls):
         #Update timer
+
         cur_time = time.time()
         elapsed_time = cur_time - self.prev_time
         self.prev_time = time.time()

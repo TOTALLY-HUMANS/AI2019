@@ -18,6 +18,7 @@ from video_capture import VideoCapture
 
 from ball_detector import BallDetector
 from aruco_detector import ArucoDetector
+from aruco_tracker import ArucoTracker
 from euclidian_tracker import EuclidianTracker
 
 from my_robot import drive_commands
@@ -85,13 +86,15 @@ def main():
     ball_tracker = EuclidianTracker(10)
     print("Initializing aruco detector")
     aruco_detector = ArucoDetector()
+    print("Initializing aruco tracker")
+    aruco_tracker = ArucoTracker()
     try:
         print("trying")
         while 1:
             time1 = time.time()
             ret, img = cap.read()
             count += 1
-            if ret and count%2==0:
+            if ret:
                 
                 
                 img = downscale_image(img, 90)
@@ -101,13 +104,58 @@ def main():
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
+                aruco_positions = aruco_tracker.update(positions)
                 
-                visualize_detected(img, tracked_balls, corners, ids, positions)
-                
+                visualize_detected(img, tracked_balls, corners, ids, aruco_positions)
+                print(aruco_positions)
                 # Run robot AI
-                evaluateRobotState(robot_1_id, tracked_balls, positions)
+                #evaluateRobotState(robot_1_id, tracked_balls, positions)
                 #evaluateRobotState(robot_2_id, tracked_balls, positions)
+                robot_pose = (0.0, 0.0, 0.0)
+                for key,pos in aruco_positions.items():
 
+                    if pos[3] == 16:
+                        robot_pose = pos
+                    ball_found = False
+                    if len(balls) > 0:
+                        ball_pose = balls[0].center
+                        ball_x = ball_pose[0]
+                        ball_y = ball_pose[1]
+                        ball_found = True
+
+                    robot_x = robot_pose[0]
+                    robot_y = robot_pose[1]
+                    robot_yaw = robot_pose[2]
+
+                    # ohjauskomento
+                    r_com = 0.0
+                    l_com = 0.0
+                    deadzone = 90
+                    brakezone = 50
+                    if ball_found:
+                        r_com, l_com = drive_commands(
+                            ball_x, ball_y, robot_x, robot_y, robot_yaw)
+                        r_com = 170*r_com #255*r_com
+                        l_com = 170*l_com #255*l_com
+                        print(l_com,r_com)
+                        '''
+                        if abs(r_com) < brakezone:
+                            r_com = 0
+                        elif abs(r_com) < deadzone:
+                            if r_com < 0:
+                                r_com = r_com - deadzone
+                            if r_com > 0:
+                                r_com = r_com + deadzone
+                        if abs(l_com) < brakezone:
+                            l_com = 0
+                        elif abs(l_com) < deadzone:
+                            if l_com < 0:
+                                l_com = l_com - deadzone
+                            if r_com > 0:
+                                l_com = l_com + deadzone
+                        '''
+                    # ohjauskomento sokettiin
+                    SI1.send_command(r_com, l_com)
             time2 = time.time()
             frame_time = (time2-time1)*1000
             if frame_time != 0:
@@ -142,7 +190,7 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(img, str(key), val.center, font, 1, (0, 255, 0), 2, cv2.LINE_AA)
     aruco.drawDetectedMarkers(img, aruco_corners, aruco_ids)
-    for p in positions:
+    for key,p in positions.items():
         x, z, theta, id = p
         x = int(x)
         z = int(z)

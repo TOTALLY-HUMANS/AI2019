@@ -138,11 +138,12 @@ def simple_follow_waypoints(wp_x, wp_y,):
     
     
 def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw):
-    speed = 1.0
+    '''
+    speed = 0.1
     goal_theta = math.atan2(wp_y-robot_y, wp_x-robot_x)
     #theta_error = normalize_angle((robot_yaw)  - goal_theta  )
-    theta_error = ((robot_yaw)  - goal_theta  )
-    thred = 45.0*DEG2RAD
+    theta_error = normalize_angle((robot_yaw)  - goal_theta  )
+    thred = 20.0*DEG2RAD
     
     d = math.sqrt((wp_x - robot_x)**2 + (wp_y - robot_y)**2)
     
@@ -163,12 +164,13 @@ def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw):
       print("driving forward")
       return speed, speed
     else:
-      #yaw_pid = PID(0.05,0.0, 0.0)
+      #yaw_pid = PID(0.2,0.0, 0.0)
       #yaw_control = yaw_pid.pid(theta_error)
       #Vr, Vl = controls(0.0, yaw_control) 
       print("turning")
-      return -speed, 0.0
-    """  
+      return -speed*0.9, 0.0
+      #return Vr, Vl
+    
     speed = 0.05
 
     d = math.sqrt((wp_x - robot_x)**2 + (wp_y - robot_y)**2)
@@ -192,8 +194,33 @@ def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw):
 
 
     return (Vr,Vl)
-    """
- 
+    '''
+    
+    speed = 0.4
+    yaw_pid = PID(4.5,0.0, 0.0)
+    d = math.sqrt((wp_x - robot_x)**2 + (wp_y - robot_y)**2)
+    goal_theta = math.atan2(wp_y-robot_y, wp_x-robot_x)
+    theta_error = normalize_angle((robot_yaw)  - goal_theta  )
+    
+    if d < 0.20:
+      Vr, Vl = controls(0.0, 0.0)
+      return (Vr, Vl)
+    yaw_control = yaw_pid.pid(theta_error)
+    Vr, Vl = controls(speed, yaw_control)
+    
+    print("goal " +str(wp_x) +", " +str(wp_y))
+    print("d " +str(d))
+    print("theta_error " +str(theta_error) )
+    print("curr_theta " +str((robot_yaw)) )
+    print("curr pose " +str(robot_x) +", " +str(robot_y))
+    print("goal_theta " +str(goal_theta) )
+
+    print("curr " +str(robot_x) + ", " +str(robot_y))
+    
+
+
+    return (Vr,Vl)
+     
 
 
 
