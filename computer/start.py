@@ -339,6 +339,18 @@ def ChaseTarget(robot, tracked, robot_pose):
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
+    found = False
+    for key, ball in tracked.items():
+        if robot == robot_1_id:
+            if key == robot_1_target:
+                found = True
+        if robot == robot_2_id:
+            if key == robot_2_target:
+                found = True
+    if not found:
+        updateState(robot, RobotState.FindTarget)
+        return
+
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
     if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 10):
         updateState(robot, RobotState.PushBallToGoal)
