@@ -40,14 +40,14 @@ radius_range = [13, 16]
 
 
 #sentti pikseleiss
-centimeter = 10
+centimeter = (1080*(90/100))/402
 
 # ROBOT STATE DEFINITIONS
 class RobotState(IntEnum):
     Idle = 0
     FindTarget = 1
     ChaseTarget = 2
-    PrepareToHitTarget = 3
+    PushBallToGoal = 3
     HitTarget = 4
 
 robot_1_id = 16
@@ -58,17 +58,23 @@ robot_1_target = None
 robot_2_target = None
 robot_1_target_id = None
 robot_2_target_id = None
+robot_1_path = None
+robot_2_path = None
+robot_1_path_current_node = None
+robot_2_path_current_node = None
 SI1 = None
 SI2 = None
 UltrasonicSensor = None
 own_goal_pose = (0, 0)
-opponent_goal_pose = (1080, 1080)
+opponent_goal_pose = (972, 972)
 ROBOT_SIZE = 100
+mask = None
 
 # MAIN LOOPERO
 def main():
     global SI1
     global SI2
+    global mask
     print("Loading configuration.")
     with open('config.json') as json_data:
         config = json.load(json_data)
@@ -96,8 +102,6 @@ def main():
             ret, img = cap.read()
             count += 1
             if ret:
-                
-                
                 img = downscale_image(img, 90)
 
                 balls, mask = ball_detector.detect_balls(img)
@@ -107,12 +111,12 @@ def main():
                 positions = aruco_detector.get_positions(corners, ids)
                 aruco_positions = aruco_tracker.update(positions)
 
-                mask = evaluateStageMask(mask, positionsmask, 200)
+                mask = evaluateStageMask(mask, positions, 200)
+
                 # find path
                 start_time = time.time()
-                path = astar(mask, (0, 0), (190,190))
                 elapsed_time = time.time() - start_time
-                print("astar time:" + str(elapsed_time))
+                #print("astar time:" + str(elapsed_time))
                 #path_x = [i[0] for i in path] 
                 #path_y = [i[1] for i in path]
                 #mask[path_x, path_y] = 125
@@ -250,7 +254,7 @@ def evaluateStageMask(mask, positions, resize_side):
 
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
     mask = cv2.dilate(mask, kernel, iterations=10)
-    mask = cv2.resize(mask, (resize_side, resize_side))
+    mask = cv2.resize(mask, (int(972*0.2), int(972*0.2)))
 
     return mask
 
@@ -269,6 +273,12 @@ def FindTarget(robot, tracked, robot_pose):
     global robot_2_target
     global robot_1_target_id
     global robot_2_target_id
+    global robot_1_path
+    global robot_1_path_current_node
+    global robot_2_path
+    global robot_2_path_current_node
+    global mask
+
     print(str(robot) + ": Finding target...")
     if len(tracked) == 0: # Palloja ei loydy, idlataan
         print(str(robot) + ": No balls found, idling")
@@ -284,6 +294,24 @@ def FindTarget(robot, tracked, robot_pose):
         robot_2_target_id = key
     if target is not None:
         print(str(robot) + ": Starting chase...")
+        if robot == robot_1_id:
+            path = astar(mask,
+                (int(robot_pose[0] * 0.2), int(robot_pose[1] * 0.2)),
+                (int(target.center[0] * 0.2), int(target.center[1] * 0.2))
+            )
+            path_x = [i[0] for i in path] 
+            path_y = [i[1] for i in path]
+            mask[path_x, path_y] = 125
+            
+            robot_1_path = []
+            for index, item in enumerate(path):
+                if(index%20 == 0):
+                    tuple_item = (item[1]*5, item[0]*5)
+                    robot_1_path.append(tuple_item)
+            robot_1_path_current_node = 1
+        if robot == robot_2_id:
+            robot_2_path = astar(mask, robot_pose, target.center)
+            robot_2_path_current_node = 1
         updateState(robot, RobotState.ChaseTarget) # Kohde loytyy, lahdetaan peraan
     else:
         print(str(robot) + ": No suitable ball found, idling...")
@@ -291,34 +319,58 @@ def FindTarget(robot, tracked, robot_pose):
 
 # Ajetaan pallon tyypista riippuen sen eteen tai taakse
 def ChaseTarget(robot, tracked, robot_pose):
+    #global robot_1_path
+    #global robot_1_path_current_node
+    #global robot_2_path
+    #global robot_2_path_current_node
+
     id_number, target = getTarget(robot)
     print(str(robot) + ": Chasing target: " + str(id_number))
+    # ASTAR _______ EPÄKOMMENTOIDAAN JOS KÄYTETÄÄN
     # Liikutaan pallon taakse
-    moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
+    #if robot == robot_1_id:
+    #    print(str(robot) + ": Targeting node in " + str(robot_1_path[robot_1_path_current_node]))
+    #    moveTowardsTarget(robot, robot_1_path[robot_1_path_current_node], robot_pose)
+    #    if isNearTarget(robot_pose, robot_1_path[robot_1_path_current_node]): # Saavutettiin edellinen node, siirrytään seuraavaan
+    #        robot_1_path_current_node = robot_1_path_current_node + 1
+    #        if robot_1_path_current_node >= len(robot_1_path): # Lähellä palloa, siirrytään elämässä eteenpäin
+    #            updateState(robot, RobotState.FindTarget)
+    #if robot == robot_2_id:
+    #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
+    #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
+    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    #if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
-    #    updateState(robot, RobotState.PrepareToHitTarget)
+    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 10):
+        updateState(robot, RobotState.PushBallToGoal)
 
-# Tahdataan palloon
-def PrepareToHitTarget(robot, tracked, robot_pose):
+# Pusketaan pallo maaliin
+def PushBallToGoal(robot, tracked, robot_pose):
     global SI1
     global SI2
 
     print(str(robot) + ": Preparing to hit target...")
     # Kaannytaan kohti palloa
     id_number, target = getTarget(robot)
-    rotateTowardsTarget(robot, target)
+    #rotateTowardsTarget(robot, target)
+    if target.color == -1:
+        moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
+        if isNearTarget(robot_pose, opponent_goal_pose, 30):
+            updateState(robot, RobotState.Idle)
+    if target.color == 1:
+        moveTowardsTarget(robot, own_goal_pose, robot_pose)
+        if isNearTarget(robot_pose, own_goal_pose, 30):
+            updateState(robot, RobotState.Idle)
 
     # Jos ollaan riittavan lahella, jyrataan pain
-    socket = None
-    if robot == robot_1_id:
-        socket = SI1
-    if robot == robot_2_id:
-        socket = SI2
-    socket.servo_forward()
-    if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
+    #socket = None
+    #if robot == robot_1_id:
+    #    socket = SI1
+    #if robot == robot_2_id:
+    #    socket = SI2
+    #socket.servo_forward()
+    #if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
 
-        updateState(robot, RobotState.HitTarget)
+    #    updateState(robot, RobotState.HitTarget)
     
 # Jyrataan palloon
 def HitTarget(robot, tracked, robot_pose):
@@ -356,7 +408,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         0: Idle,
         1: FindTarget,
         2: ChaseTarget,
-        3: PrepareToHitTarget,
+        3: PushBallToGoal,
         4: HitTarget,
     }
     robot_pose = (0.0, 0.0, 0.0)
@@ -437,9 +489,9 @@ def coordinatesForBall(ball):
     
     return position_behind_ball
 
-def isNearTarget(robot_pose, target):
+def isNearTarget(robot_pose, target, distanceInCentimeters):
     dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
-    if dist < centimeter * 10:
+    if dist < centimeter * distanceInCentimeters:
         return True
     return False
 
@@ -526,7 +578,7 @@ def moveTowardsTarget(robot, target_pose, robot_pose):
         ball_x, ball_y, robot_x, robot_y, robot_yaw)
     r_com = 170*r_com #255*r_com
     l_com = 170*l_com #255*l_com
-    print(l_com,r_com)
+    #print(l_com,r_com)
 
     # ohjauskomento sokettiin
     if robot == robot_1_id:
