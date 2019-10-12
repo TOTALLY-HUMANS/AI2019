@@ -367,9 +367,9 @@ def ChaseTarget(robot, tracked, robot_pose):
         return
 
     updateBallCoordinates(robot, tracked)
-    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target,wall_correction), robot_pose)
+    moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target,wall_correction), 10):
+    if isNearTarget(robot_pose, coordinatesForBall(target), 20):
         updateState(robot, RobotState.TurnTowardsTarget)
 
 
@@ -382,11 +382,11 @@ def PushBallToGoal(robot, tracked, robot_pose):
     id_number, target = getTarget(robot)
     if target.color == -1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, own_goal_pose, 50):
+        if isNearTarget(robot_pose, own_goal_pose, 70):
             updateState(robot, RobotState.Idle)
     if target.color == 1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, opponent_goal_pose, 50):
+        if isNearTarget(robot_pose, opponent_goal_pose, 70):
             updateState(robot, RobotState.Idle)
 
     # Jos ollaan riittavan lahella, jyrataan pain
