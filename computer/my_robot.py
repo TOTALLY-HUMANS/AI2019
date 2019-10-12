@@ -137,7 +137,7 @@ def simple_follow_waypoints(wp_x, wp_y,):
     controls(0.0, 0.0)
     
     
-def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw):
+def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw, speed = 0.4):
     '''
     speed = 0.1
     goal_theta = math.atan2(wp_y-robot_y, wp_x-robot_x)
@@ -196,7 +196,6 @@ def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw):
     return (Vr,Vl)
     '''
     
-    speed = 0.4
     yaw_pid = PID(4.5,0.0, 0.0)
     d = math.sqrt((wp_x - robot_x)**2 + (wp_y - robot_y)**2)
     goal_theta = math.atan2(wp_y-robot_y, wp_x-robot_x)
