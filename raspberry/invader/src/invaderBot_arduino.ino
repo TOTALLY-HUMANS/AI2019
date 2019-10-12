@@ -99,13 +99,10 @@ void batteryTask()
 
 void setup() {
   Serial.begin(9600);
-<<<<<<< HEAD
-  Serial.setTimeout(50);  
 
-=======
   //Set maximum wait time for serial input, default is 1000ms
   Serial.setTimeout(50)
->>>>>>> 21d75f4c4164ac9d591d0895e6d9ca3894b830bb
+
   // Motor Driver;
   pinMode(13, OUTPUT);
   pinMode(11, OUTPUT);

@@ -21,7 +21,7 @@ class socketInterface():
     t.start()
 
   def send_command(self, r_com, l_com):
-    command = "M" + str(int(r_com))+"#"+str(int(l_com))
+    command = "M"+"#" + str(int(r_com))+"#"+str(int(l_com))
     self.conn.send(command.encode())
 
   def servo_forward(self):
