@@ -24,6 +24,7 @@ from euclidian_tracker import EuclidianTracker
 from my_robot import drive_commands
 from socket_interface import socketInterface
 
+from astar import astar
 
 # Greenish yellow hsv
 yellow_low = np.array([25, 50, 160])
@@ -99,12 +100,22 @@ def main():
                 
                 img = downscale_image(img, 90)
 
-                balls,mask = ball_detector.detect_balls(img)
+                balls, mask = ball_detector.detect_balls(img)
                 tracked_balls = ball_tracker.update(balls)
 
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
                 aruco_positions = aruco_tracker.update(positions)
+
+                mask = evaluateStageMask(mask, positions)
+                # find path
+                start_time = time.time()
+                path = astar(mask, (0, 0), (190,190))
+                elapsed_time = time.time() - start_time
+                print("astar time:" + str(elapsed_time))
+                #path_x = [i[0] for i in path] 
+                #path_y = [i[1] for i in path]
+                #mask[path_x, path_y] = 125
                 
                 visualize_detected(img, tracked_balls, corners, ids, aruco_positions)
                 print(aruco_positions)
@@ -202,6 +213,45 @@ def visualize_detected(img, balls, aruco_corners, aruco_ids, positions):
         cv2.line(img, center, forward, color, 2)
     cv2.imshow('Detected', img)
     key = cv2.waitKey(1)
+
+
+def evaluateStageMask(mask, positions):
+    # remove balls
+    mask[mask == 255] = 0
+
+    # create masks for robots
+    for p in positions:
+        #print(p)
+        x = p[0]
+        y = p[1]
+        theta = p[2]
+        c,s = np.cos(theta), np.sin(theta)
+        t = np.array([x,y])
+        rot_mat = np.array((c, -s),(s, c))
+        for i in range(-30,30):
+            for j in range(-30,30):
+                trans_i = i*c +s*j
+                trans_j = -i*s +c*j
+                mask[int(trans_i+y),int(trans_j+x)] = 255
+
+    # dilate balls and robot, resize mask
+    center_x = 500 # center of stage
+    center_y = 450
+    theta = 7.1
+    c,s = np.cos(theta), np.sin(theta)
+    t = np.array([center_x,center_y])
+    rot_mat = np.array((c, -s),(s, c))
+    for i2 in range(-150,150):
+        for j2 in range(-150,150):
+            trans_i = i2*c +s*j2
+            trans_j = -i2*s +c*j2
+            mask[int(trans_i+center_y),int(trans_j+center_x)] = 150
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
+    mask = cv2.dilate(mask, kernel, iterations=10)
+    mask = cv2.resize(mask, (200, 200))
+
+    return mask
 
 ### HERE BEGINS ROBOT AI ###
 

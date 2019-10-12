@@ -37,11 +37,16 @@ def astar(array, start, goal):
 
         close_set.add(current)
         for i, j in neighbors:
-            neighbor = current[0] + i, current[1] + j            
-            tentative_g_score = gscore[current] + 1.0#heuristic(current, neighbor)
+            neighbor = current[0] + i, current[1] + j
+
+            tentative_g_score = gscore[current] + 1.0
+
+            if array[neighbor[0]][neighbor[1]] == 150:            
+                tentative_g_score = gscore[current] + 200.0#heuristic(current, neighbor)
+            
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:                
-                    if array[neighbor[0]][neighbor[1]] >= 1:
+                    if array[neighbor[0]][neighbor[1]] > 150:
                         continue
                 else:
                     # array bound y walls
