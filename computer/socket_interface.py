@@ -21,7 +21,7 @@ class socketInterface():
     t.start()
 
   def send_command(self, r_com, l_com):
-    command = "M" + str(int(r_com))+"#"+str(int(l_com))
+    command = "M"+"#" + str(int(r_com))+"#"+str(int(l_com))
     self.conn.send(command.encode())
 
   def servo_forward(self):
@@ -43,8 +43,8 @@ class socketInterface():
         string = str(robo_m).index("DISTANCE:")
       except:
         return
-      if string[0] == '1': dist1 = float(string[10,len(string)])
-      if string[0] == '2': dist2 = float(string[10,len(string)])
+      #if string[0] == '1': dist1 = float(string[10,len(string)])
+      #if string[0] == '2': dist2 = float(string[10,len(string)])
   
   def __del__(self):
     if self.conn is not None:

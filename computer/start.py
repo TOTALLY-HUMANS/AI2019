@@ -11,7 +11,7 @@ from cv2 import aruco
 from math import acos
 from math import sqrt
 from math import pi
-import vg
+#import vg
 
 from scipy.spatial import distance
 
@@ -53,6 +53,7 @@ class RobotState(IntEnum):
     ChaseTarget = 2
     PushBallToGoal = 3
     TurnTowardsTarget = 4
+    OpenServo = 5
 
 robot_1_id = 16
 robot_2_id = 17
@@ -290,11 +291,11 @@ def FindTarget(robot, tracked, robot_pose):
         updateState(robot, RobotState.Idle)
         return
     if robot == robot_1_id: # Ykkosrobo jahtaa punaista
-        key, ball = getClosestBall(tracked, robot_pose, -1)
+        key, ball = getClosestBall(tracked, robot_pose, robot_2_target_id)
         robot_1_target = target = ball
         robot_1_target_id = key
     if robot == robot_2_id: # Kakkosrobo jahtaa keltaista
-        key, ball = getClosestBall(tracked, robot_pose, 1)
+        key, ball = getClosestBall(tracked, robot_pose, robot_1_target_id)
         robot_2_target = target = ball
         robot_2_target_id = key
     if target is not None:
@@ -326,6 +327,10 @@ def FindTarget(robot, tracked, robot_pose):
 
 # Ajetaan pallon tyypista riippuen sen eteen tai taakse
 def ChaseTarget(robot, tracked, robot_pose):
+    global robot_1_target_id
+    global robot_2_target_id
+    global robot_1_id
+    global robot_2_id
     #global robot_1_path
     #global robot_1_path_current_node
     #global robot_2_path
@@ -347,24 +352,30 @@ def ChaseTarget(robot, tracked, robot_pose):
     #if robot == robot_2_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
-    moveTowardsTarget(robot, coordinatesForRobotBehindBall(target,wall_correction), robot_pose)
     found = False
+    for key in tracked.items():
+        print("Ball available: " + str(key))
     for key, ball in tracked.items():
         if robot == robot_1_id:
-            if key == robot_1_target:
+            if str(key) == str(robot_1_target_id):
                 found = True
         if robot == robot_2_id:
-            if key == robot_2_target:
+            if str(key) == str(robot_2_target_id):
                 found = True
     if not found:
+        print(str(robot) + ": Lost ball while chasing it, picking new target")
         updateState(robot, RobotState.FindTarget)
         return
 
+    updateBallCoordinates(robot, tracked)
+    moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
+    if isNearTarget(robot_pose, coordinatesForBall(target), 20):
+        updateState(robot, RobotState.PushBallToGoal)
 
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target,wall_correction), 10):
-        updateState(robot, RobotState.TurnTowardsTarget)
-
+def OpenServo(robot, tracked, robot_pose):
+    # TASSA AVATAAN SERVOKOURA
+    updateState(robot, RobotState.Idle)
 
 # Pusketaan pallo maaliin
 def PushBallToGoal(robot, tracked, robot_pose):
@@ -374,13 +385,13 @@ def PushBallToGoal(robot, tracked, robot_pose):
     print(str(robot) + ": Pushing ball to goal")
     id_number, target = getTarget(robot)
     if target.color == -1:
-        moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, opponent_goal_pose, 50):
-            updateState(robot, RobotState.Idle)
-    if target.color == 1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, own_goal_pose, 50):
-            updateState(robot, RobotState.Idle)
+        if isNearTarget(robot_pose, own_goal_pose, 70):
+            updateState(robot, RobotState.OpenServo)
+    if target.color == 1:
+        moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
+        if isNearTarget(robot_pose, opponent_goal_pose, 70):
+            updateState(robot, RobotState.OpenServo)
 
     # Jos ollaan riittavan lahella, jyrataan pain
     #socket = None
@@ -401,6 +412,7 @@ def TurnTowardsTarget(robot, tracked, robot_pose):
     global SI2
 
     print(str(robot) + ": Rotating towards target")
+    id_number, target = getTarget(robot)
     if target.color == -1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose, 0)
         if isPointingTowards(robot_pose, opponent_goal_pose):
@@ -421,6 +433,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         2: ChaseTarget,
         3: PushBallToGoal,
         4: TurnTowardsTarget,
+        5: OpenServo,
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
@@ -494,9 +507,9 @@ def coordinatesForRobotBehindBall(ball,correction):
     if pos_y <= 0:
         pos_y = correction
     if pos_x >= 972:
-        pos_x = -correction
+        pos_x = 972-correction
     if pos_y >= 972:
-        pos_y = -correction
+        pos_y = 972-correction
     return (pos_x,pos_y)
 
 
@@ -517,6 +530,21 @@ def isNearTarget(robot_pose, target, distanceInCentimeters):
         return True
     return False
 
+#pi to pi
+def normalize_angle(angle):
+    if  angle < -2.0*math.pi or angle > 2.0*math.pi:
+        n   = math.floor(angle/(2.0*math.pi))
+        angle = angle - n*(2.0*math.pi)
+    
+
+    if angle > math.pi:
+        angle = angle - (2.0*math.pi)
+
+    if angle < -math.pi:
+        angle = angle + (2.0*math.pi)
+
+    return angle
+
 def isPointingTowards(robot_pose, target_pose):
     DEG2RAD = math.pi/180.0
     RAD2DEG = 180.0/math.pi
@@ -526,18 +554,32 @@ def isPointingTowards(robot_pose, target_pose):
         return True
     return False
 
-def getClosestBall(tracked, robot_pose, ballType):
+def getClosestBall(tracked, robot_pose, ignore_ball):
     chosenBall = None
     chosenBallId = -1
     shortestDistance = 100000
     for key, ball in tracked.items():
-        if (ball.color == ballType):
-            dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
-            if (dist < shortestDistance):
-                shortestDistance = dist
-                chosenBall = ball
-                chosenBallId = key
+        if key is not ignore_ball:
+            if distance.euclidean(ball.center, own_goal_pose) > (60*centimeter) and distance.euclidean(ball.center, opponent_goal_pose) > (60*centimeter):
+                dist = distance.euclidean(ball.center, (robot_pose[0], robot_pose[1]))
+                if (dist < shortestDistance):
+                    shortestDistance = dist
+                    chosenBall = ball
+                    chosenBallId = key
     return chosenBallId, chosenBall
+
+def updateBallCoordinates(robot, tracked):
+    global robot_1_id
+    global robot_1_target
+    global robot_2_id
+    global robot_2_target
+    for key, ball in tracked.items():
+        if robot == robot_1_id:
+            if key == robot_1_target_id:
+                robot_1_target = ball
+        if robot == robot_2_id:
+            if key == robot_2_target_id:
+                robot_2_target = ball
 
 # ROBOTIN LIIKKUMINEN
 

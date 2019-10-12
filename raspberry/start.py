@@ -34,7 +34,7 @@ def main():
 		##Normaali ajokomento
 		if data[0] == 'M':
 			split_data = data.split('#')
-			#print("r_com " , str(split_data[1]), " l_com " ,str(split_data[2]))
+			#print("r_com " , str(split_data[0]), " l_com " ,str(split_data[1]))
 			r_com = str(split_data[1])
 			l_com = str(split_data[2])
 			data = 'R' + str(r_com) + 'L' + str(l_com) + ' '

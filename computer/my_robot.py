@@ -22,7 +22,7 @@ def controls(vel, omega):
     L = 0.2
     V_r = (2.0*vel + omega*L)/(2.0*R)
     V_l = (2.0*vel - omega*L)/(2.0*R)
-    print("left_control: " +str(V_l) +" right control: " +str(V_r))
+    #print("left_control: " +str(V_l) +" right control: " +str(V_r))
     
     min_v = min(V_r, V_l)
     max_v = max(V_r, V_l)
@@ -31,7 +31,7 @@ def controls(vel, omega):
         
 
     V_r, V_l = limit_controls(V_r, V_l)
-    print("scaled left_control: " +str(V_l) +" scaled right control: " +str(V_r))
+    #print("scaled left_control: " +str(V_l) +" scaled right control: " +str(V_r))
 
     #bot.set_motors(V_r , V_l)
     #bot.step()
@@ -207,14 +207,14 @@ def drive_commands(wp_x, wp_y, robot_x, robot_y, robot_yaw, speed = 0.4):
     yaw_control = yaw_pid.pid(theta_error)
     Vr, Vl = controls(speed, yaw_control)
     
-    print("goal " +str(wp_x) +", " +str(wp_y))
-    print("d " +str(d))
-    print("theta_error " +str(theta_error) )
-    print("curr_theta " +str((robot_yaw)) )
-    print("curr pose " +str(robot_x) +", " +str(robot_y))
-    print("goal_theta " +str(goal_theta) )
+    #print("goal " +str(wp_x) +", " +str(wp_y))
+    #print("d " +str(d))
+    #print("theta_error " +str(theta_error) )
+    #print("curr_theta " +str((robot_yaw)) )
+    #print("curr pose " +str(robot_x) +", " +str(robot_y))
+    #print("goal_theta " +str(goal_theta) )
 
-    print("curr " +str(robot_x) + ", " +str(robot_y))
+    #print("curr " +str(robot_x) + ", " +str(robot_y))
     
 
 
