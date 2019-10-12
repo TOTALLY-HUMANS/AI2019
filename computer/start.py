@@ -11,7 +11,7 @@ from cv2 import aruco
 from math import acos
 from math import sqrt
 from math import pi
-import vg
+#import vg
 
 from scipy.spatial import distance
 
