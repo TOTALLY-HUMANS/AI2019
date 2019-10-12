@@ -341,6 +341,18 @@ def ChaseTarget(robot, tracked, robot_pose):
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
     moveTowardsTarget(robot, coordinatesForRobotBehindBall(target), robot_pose)
+    found = False
+    for key, ball in tracked.items():
+        if robot == robot_1_id:
+            if key == robot_1_target:
+                found = True
+        if robot == robot_2_id:
+            if key == robot_2_target:
+                found = True
+    if not found:
+        updateState(robot, RobotState.FindTarget)
+        return
+
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
     if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 3):
         updateState(robot, RobotState.PushBallToGoal)
@@ -356,11 +368,11 @@ def PushBallToGoal(robot, tracked, robot_pose):
     #rotateTowardsTarget(robot, target)
     if target.color == -1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, opponent_goal_pose, 30):
+        if isNearTarget(robot_pose, opponent_goal_pose, 50):
             updateState(robot, RobotState.Idle)
     if target.color == 1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, own_goal_pose, 30):
+        if isNearTarget(robot_pose, own_goal_pose, 50):
             updateState(robot, RobotState.Idle)
 
     # Jos ollaan riittavan lahella, jyrataan pain
