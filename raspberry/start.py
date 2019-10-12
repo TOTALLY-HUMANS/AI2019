@@ -37,10 +37,12 @@ def main():
 			#if not ser.isOpen():
 			#print("serial not ok")
 			ser.write(data)
+
 #		if data[0] == 'S':
 #			SC.MoveForward()
 #		if data[0] == 'R':
 #			SC.MoveBackward()
+
 
 
 

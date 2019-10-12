@@ -12,6 +12,7 @@ class socketInterface():
 
   def setup_socket(self):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     s.bind(('', 50001))
     s.listen(1)
     self.conn, addr = s.accept()
