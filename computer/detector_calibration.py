@@ -38,13 +38,13 @@ def main():
         config = json.load(json_data)
 
     print("Connecting to camera.")
-    cap = AvVideoCapture(url)
+    #cap = AvVideoCapture(url)
     #cap = VideoCapture(url)
 
-    #cap = cv2.VideoCapture("videos/ArucoVideo.ts")
+    cap = cv2.VideoCapture("videos/ArucoVideo.ts")
 
     print("Initializing ball detector.")
-    ball_detector = BallDetector(config["ball_detector"], debug=True)
+    ball_detector = BallDetector(config["ball_detector"], debug=False)
     aruco_detector = ArucoDetector()
     print(config)
     cm_in_pixels = (1080*(config["downscale_p"]/100))/config["arena_side"]
@@ -58,10 +58,11 @@ def main():
 
             if ret:
 
-                img = downscale_image(img, config["downscale_p"])
+                img = downscale_image(img, config["downscale_p"]) 
+                # 972 x 972
 
                 balls, mask = ball_detector.detect_balls(img)  
-
+                mask[mask == 255] = 150
                 corners, ids = aruco_detector.get_arucos(img)
                 positions = aruco_detector.get_positions(corners, ids)
                 #print(mask.max())
@@ -74,24 +75,50 @@ def main():
                     t = np.array([x,y])
                     rot_mat = np.array((c, -s),(s, c))
                     for i in range(-30,30):
-                      for j in range(-30,30):
-                        trans_i = i*c +s*j
-                        trans_j = -i*s +c*j
-                        mask[int(trans_i+y),int(trans_j+x)] = 255
+                        for j in range(-30,30):
+                            trans_i = i*c +s*j
+                            trans_j = -i*s +c*j
+                            mask[int(trans_i+y),int(trans_j+x)] = 255
  
                 # dilate balls and robot, resize mask
+                
+                center_x = 500
+                center_y = 450
+                theta = 7.1
+                c,s = np.cos(theta), np.sin(theta)
+                t = np.array([center_x,center_y])
+                rot_mat = np.array((c, -s),(s, c))
+                for i2 in range(-150,150):
+                    for j2 in range(-150,150):
+                        trans_i = i2*c +s*j2
+                        trans_j = -i2*s +c*j2
+                        mask[int(trans_i+center_y),int(trans_j+center_x)] = 150
+
                 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
                 mask = cv2.dilate(mask, kernel, iterations=10)
-                mask = cv2.resize(mask, (200, 200))
+                mask = cv2.resize(mask, (int(972*0.2), int(972*0.2)))
+                #mask = downscale_image(img, 20)
+                print(mask.shape)
 
                 # find path
-                path = astar(mask, (90,90), (149,149))
+                start_time = time.time()
+                path = astar(mask, (0, 0), (190,190))
+                elapsed_time = time.time() - start_time
+                print("astar time:" + str(elapsed_time))
                 path_x = [i[0] for i in path] 
                 path_y = [i[1] for i in path]
                 mask[path_x, path_y] = 125
+                
+                scaled_path = []
+                for index, item in enumerate(path):
+                    if(index%20 == 0):
+                        tuple_item = (item[1]*5, item[0]*5)
+                        scaled_path.append(tuple_item)
+                        cv2.circle(img, tuple_item, 2, (0,0,225))
 
-                #cv2.imshow('orig', img)
-                cv2.imshow('mask_test', mask)
+                print(scaled_path)
+                cv2.imshow('orig', img)
+                #cv2.imshow('mask_test', mask)
                 key = cv2.waitKey(1)
 
     except:
