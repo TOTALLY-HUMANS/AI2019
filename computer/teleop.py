@@ -17,27 +17,27 @@ def setup_socket():
 def main():
 	
 	# message form for the socket communications "rightcomman#leftcommand#, e.g. "-100#100"
-	speed = 90
+	speed = 100
 	while True:
 		command = "0#0"
 		button_pressed = False
 		if keyboard.is_pressed('w'):
-      	  		command = str(speed)+"#"+str(speed)
+      	  		command = "M" + str(speed)+"#"+str(speed)
 			button_pressed = True
 		if keyboard.is_pressed('a'):
-                        command = str(-speed)+"#"+str(speed)
+                        command = "M" + str(-speed)+"#"+str(speed)
                         button_pressed = True
 
     		if keyboard.is_pressed('s'):
-                        command = str(-speed)+"#"+str(-speed)
+                        command = "M" + str(-speed)+"#"+str(-speed)
                         button_pressed = True
 
     		if keyboard.is_pressed('d'):
-                        command = str(speed)+"#"+str(-speed)
+                        command = "M" + str(speed)+"#"+str(-speed)
                         button_pressed = True
 
 		if keyboard.is_pressed('h'):
-                        command = "0#0"
+                        command = "M0#0"
                         button_pressed = True
 
 		if button_pressed:
