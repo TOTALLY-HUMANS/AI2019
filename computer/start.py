@@ -53,6 +53,7 @@ class RobotState(IntEnum):
     ChaseTarget = 2
     PushBallToGoal = 3
     TurnTowardsTarget = 4
+    OpenServo = 5
 
 robot_1_id = 16
 robot_2_id = 17
@@ -372,6 +373,9 @@ def ChaseTarget(robot, tracked, robot_pose):
     if isNearTarget(robot_pose, coordinatesForBall(target), 20):
         updateState(robot, RobotState.PushBallToGoal)
 
+def OpenServo(robot, tracked, robot_pose):
+    # TASSA AVATAAN SERVOKOURA
+    updateState(robot, RobotState.Idle)
 
 # Pusketaan pallo maaliin
 def PushBallToGoal(robot, tracked, robot_pose):
@@ -383,11 +387,11 @@ def PushBallToGoal(robot, tracked, robot_pose):
     if target.color == -1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
         if isNearTarget(robot_pose, own_goal_pose, 70):
-            updateState(robot, RobotState.Idle)
+            updateState(robot, RobotState.OpenServo)
     if target.color == 1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
         if isNearTarget(robot_pose, opponent_goal_pose, 70):
-            updateState(robot, RobotState.Idle)
+            updateState(robot, RobotState.OpenServo)
 
     # Jos ollaan riittavan lahella, jyrataan pain
     #socket = None
@@ -429,6 +433,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         2: ChaseTarget,
         3: PushBallToGoal,
         4: TurnTowardsTarget,
+        5: OpenServo,
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
