@@ -502,9 +502,9 @@ def coordinatesForRobotBehindBall(ball,correction):
     if pos_y <= 0:
         pos_y = correction
     if pos_x >= 972:
-        pos_x = -correction
+        pos_x = 972-correction
     if pos_y >= 972:
-        pos_y = -correction
+        pos_y = 972-correction
     return (pos_x,pos_y)
 
 
