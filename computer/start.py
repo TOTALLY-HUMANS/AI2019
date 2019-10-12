@@ -109,7 +109,7 @@ def main():
                 visualize_detected(img, tracked_balls, corners, ids, aruco_positions)
                 print(aruco_positions)
                 # Run robot AI
-                evaluateRobotState(robot_1_id, tracked_balls, positions)
+                evaluateRobotState(robot_1_id, tracked_balls, aruco_positions)
                 #evaluateRobotState(robot_2_id, tracked_balls, positions)
                 
                 '''robot_pose = (0.0, 0.0, 0.0)
@@ -311,8 +311,8 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
-    for pos in robot_positions:
-        if pos[3] == robot:
+    for key, pos in robot_positions.items():
+        if key == robot:
             robot_pose = (pos[0], pos[1], pos[2])
             pose_found = True
     if not pose_found:
