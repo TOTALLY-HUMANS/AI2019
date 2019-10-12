@@ -8,6 +8,10 @@ import cv2
 import av
 import numpy as np
 from cv2 import aruco
+from math import acos
+from math import sqrt
+from math import pi
+import vg
 
 from scipy.spatial import distance
 
@@ -48,7 +52,7 @@ class RobotState(IntEnum):
     FindTarget = 1
     ChaseTarget = 2
     PushBallToGoal = 3
-    HitTarget = 4
+    TurnTowardsTarget = 4
 
 robot_1_id = 16
 robot_2_id = 17
@@ -326,14 +330,14 @@ def ChaseTarget(robot, tracked, robot_pose):
 
     id_number, target = getTarget(robot)
     print(str(robot) + ": Chasing target: " + str(id_number))
-    # ASTAR _______ EPÄKOMMENTOIDAAN JOS KÄYTETÄÄN
+    # ASTAR _______ EPAKOMMENTOIDAAN JOS KAYTETAAN
     # Liikutaan pallon taakse
     #if robot == robot_1_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_1_path[robot_1_path_current_node]))
     #    moveTowardsTarget(robot, robot_1_path[robot_1_path_current_node], robot_pose)
-    #    if isNearTarget(robot_pose, robot_1_path[robot_1_path_current_node]): # Saavutettiin edellinen node, siirrytään seuraavaan
+    #    if isNearTarget(robot_pose, robot_1_path[robot_1_path_current_node]): # Saavutettiin edellinen node, siirrytaan seuraavaan
     #        robot_1_path_current_node = robot_1_path_current_node + 1
-    #        if robot_1_path_current_node >= len(robot_1_path): # Lähellä palloa, siirrytään elämässä eteenpäin
+    #        if robot_1_path_current_node >= len(robot_1_path): # Lahella palloa, siirrytaan elamassa eteenpain
     #            updateState(robot, RobotState.FindTarget)
     #if robot == robot_2_id:
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
@@ -352,18 +356,16 @@ def ChaseTarget(robot, tracked, robot_pose):
         return
 
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
-    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 10):
-        updateState(robot, RobotState.PushBallToGoal)
+    if isNearTarget(robot_pose, coordinatesForRobotBehindBall(target), 15):
+        updateState(robot, RobotState.TurnTowardsTarget)
 
 # Pusketaan pallo maaliin
 def PushBallToGoal(robot, tracked, robot_pose):
     global SI1
     global SI2
 
-    print(str(robot) + ": Preparing to hit target...")
-    # Kaannytaan kohti palloa
+    print(str(robot) + ": Pushing ball to goal")
     id_number, target = getTarget(robot)
-    #rotateTowardsTarget(robot, target)
     if target.color == -1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
         if isNearTarget(robot_pose, opponent_goal_pose, 50):
@@ -382,34 +384,24 @@ def PushBallToGoal(robot, tracked, robot_pose):
     #socket.servo_forward()
     #if socket.get_distance(robot) < 20 * centimeter and isNearTarget(robot_pose, coordinatesForRobotBehindBall(target)):
 
-    #    updateState(robot, RobotState.HitTarget)
+    #    updateState(robot, RobotState.TurnTowardsTarget)
     
-# Jyrataan palloon
-def HitTarget(robot, tracked, robot_pose):
+# Kaannytaan pallon suuntaan
+def TurnTowardsTarget(robot, tracked, robot_pose):
     global robot_1_target
     global robot_2_target
     global SI1
     global SI2
 
-    print(str(robot) + ": Hitting target...")
-    # Ajetaan pain
-    ramForward(robot)
-
-    # Pallo karkasi, palataan idlaamaan (ja etsimaan uutta kohdetta)
-    socket = None
-    if robot == robot_1_id:
-        socket = SI1
-    if robot == robot_2_id:
-        socket = SI2
-    if socket.get_distance(robot) > 30 * centimeter:
-
-        # Nollataan kohde
-        if robot == robot_1_id:
-            robot_1_target = None
-        if robot == robot_2_id:
-            robot_2_target = None
-        updateState(robot, RobotState.Idle)
-
+    print(str(robot) + ": Rotating towards target")
+    if target.color == -1:
+        moveTowardsTarget(robot, opponent_goal_pose, robot_pose, 0)
+        if isPointingTowards(robot_pose, opponent_goal_pose):
+            updateState(robot, RobotState.PushBallToGoal)
+    if target.color == 1:
+        moveTowardsTarget(robot, own_goal_pose, robot_pose, 0)
+        if isPointingTowards(robot_pose, own_goal_pose):
+            updateState(robot, RobotState.PushBallToGoal)
 
 
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
@@ -421,7 +413,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         1: FindTarget,
         2: ChaseTarget,
         3: PushBallToGoal,
-        4: HitTarget,
+        4: TurnTowardsTarget,
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
@@ -490,7 +482,7 @@ def coordinatesForRobotBehindBall(ball):
     
     return position_behind_ball
 
-# Sama kuin ylempi mutta yrittää ajaa suoraan palloon
+# Sama kuin ylempi mutta yrittaa ajaa suoraan palloon
 def coordinatesForBall(ball):
     global opponent_goal_pose
     global own_goal_pose
@@ -504,6 +496,15 @@ def coordinatesForBall(ball):
 def isNearTarget(robot_pose, target, distanceInCentimeters):
     dist = distance.euclidean((target[0], target[1]), (robot_pose[0], robot_pose[1]))
     if dist < centimeter * distanceInCentimeters:
+        return True
+    return False
+
+def isPointingTowards(robot_pose, target_pose):
+    DEG2RAD = math.pi/180.0
+    RAD2DEG = 180.0/math.pi
+    goal_theta = math.atan2(target_pose[0]-robot_pose[0], target_pose[1]-robot_pose[1])
+    theta_error = normalize_angle(robot_pose[2] - goal_theta)
+    if abs(theta_error) < DEG2RAD * 10.0:
         return True
     return False
 
@@ -526,11 +527,7 @@ def ramForward(robot):
     print("Nyt mennaan")
     # AJETAAN LUJAA PaIN
 
-def rotateTowardsTarget(robot, target):
-    print("Kaannytaan targettiin")
-    # Kaannytaan kohti targetia
-
-def moveTowardsTarget(robot, target_pose, robot_pose):
+def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
     global SI1
     global SI2
 
@@ -587,7 +584,7 @@ def moveTowardsTarget(robot, target_pose, robot_pose):
     brakezone = 50
 
     r_com, l_com = drive_commands(
-        ball_x, ball_y, robot_x, robot_y, robot_yaw)
+        ball_x, ball_y, robot_x, robot_y, robot_yaw, speed)
     r_com = 170*r_com #255*r_com
     l_com = 170*l_com #255*l_com
     #print(l_com,r_com)
