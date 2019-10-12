@@ -357,6 +357,7 @@ def ChaseTarget(robot, tracked, robot_pose):
             if key == robot_2_target:
                 found = True
     if not found:
+        print(str(robot) + ": Lost ball while chasing it, picking new target")
         updateState(robot, RobotState.FindTarget)
         return
 
