@@ -715,8 +715,8 @@ def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
 
     r_com, l_com = drive_commands(
         ball_x, ball_y, robot_x, robot_y, robot_yaw, speed)
-    r_com = 175*r_com #255*r_com
-    l_com = 175*l_com #255*l_com
+    r_com = 170*r_com #255*r_com
+    l_com = 170*l_com #255*l_com
     #print(l_com,r_com)
 
     # ohjauskomento sokettiin
