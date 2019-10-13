@@ -24,13 +24,14 @@ class ServoController:
 	self.runstate = -1
 
   def _run(self):
-	print("running")
-	if self.runstate == -1:
-		self.runstate = 0
-		self.up()
-	if self.runstate == 1:
-		self.runstate = 0
-		self.down()
+	while True:
+		print("running")
+		if self.runstate == -1:
+			self.runstate = 0
+			self.up()
+		if self.runstate == 1:
+			self.runstate = 0
+			self.down()
 
   def down(self):
 	if state is not 1:
