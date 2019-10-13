@@ -6,6 +6,7 @@ import json
 # import imutils
 import cv2
 import av
+import sys
 import numpy as np
 from cv2 import aruco
 from math import acos
@@ -52,7 +53,6 @@ class RobotState(IntEnum):
     FindTarget = 1
     ChaseTarget = 2
     PushBallToGoal = 3
-    TurnTowardsTarget = 4
     OpenServo = 5
 
 robot_1_id = 16
@@ -72,6 +72,9 @@ SI2 = None
 UltrasonicSensor = None
 own_goal_pose = (0, 0)
 opponent_goal_pose = (972, 972)
+if sys.argv[0] == 'futurice':
+    own_goal_pose = (972, 972)
+    opponent_goal_pose = (0, 0)
 ROBOT_SIZE = 100
 mask = None
 wall_correction = 20
@@ -405,22 +408,22 @@ def PushBallToGoal(robot, tracked, robot_pose):
     #    updateState(robot, RobotState.TurnTowardsTarget)
     
 # Kaannytaan pallon suuntaan
-def TurnTowardsTarget(robot, tracked, robot_pose):
-    global robot_1_target
-    global robot_2_target
-    global SI1
-    global SI2
-
-    print(str(robot) + ": Rotating towards target")
-    id_number, target = getTarget(robot)
-    if target.color == -1:
-        moveTowardsTarget(robot, opponent_goal_pose, robot_pose, 0)
-        if isPointingTowards(robot_pose, opponent_goal_pose):
-            updateState(robot, RobotState.PushBallToGoal)
-    if target.color == 1:
-        moveTowardsTarget(robot, own_goal_pose, robot_pose, 0)
-        if isPointingTowards(robot_pose, own_goal_pose):
-            updateState(robot, RobotState.PushBallToGoal)
+#def TurnTowardsTarget(robot, tracked, robot_pose):
+#    global robot_1_target
+#    global robot_2_target
+#    global SI1
+#    global SI2
+#
+#    print(str(robot) + ": Rotating towards target")
+#    id_number, target = getTarget(robot)
+#    if target.color == -1:
+#        moveTowardsTarget(robot, opponent_goal_pose, robot_pose, 0)
+#        if isPointingTowards(robot_pose, opponent_goal_pose):
+#            updateState(robot, RobotState.PushBallToGoal)
+#    if target.color == 1:
+#        moveTowardsTarget(robot, own_goal_pose, robot_pose, 0)
+#        if isPointingTowards(robot_pose, own_goal_pose):
+#            updateState(robot, RobotState.PushBallToGoal)
 
 
 # Evaluoi robotin tilaa, pyorittaa tilakonetta
@@ -432,7 +435,6 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         1: FindTarget,
         2: ChaseTarget,
         3: PushBallToGoal,
-        4: TurnTowardsTarget,
         5: OpenServo,
     }
     robot_pose = (0.0, 0.0, 0.0)
