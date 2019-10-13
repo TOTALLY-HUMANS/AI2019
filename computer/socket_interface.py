@@ -30,12 +30,12 @@ class socketInterface():
     self.conn.send(command.encode())
 
   def servo_down(self):
-    print("Sending servo close")
+    #print("Sending servo close")
     command = "D"
     self.conn.send(command.encode())
 
   def servo_up(self):
-    print("Sending servo open")
+    #print("Sending servo open")
     command = "U"
     self.conn.send(command.encode())
     

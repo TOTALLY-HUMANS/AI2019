@@ -361,8 +361,8 @@ def ChaseTarget(robot, tracked, robot_pose):
     #    print(str(robot) + ": Targeting node in " + str(robot_2_path[robot_2_path_current_node]))
     #    moveTowardsTarget(robot, robot_2_path[robot_2_path_current_node], robot_pose)
     found = False
-    for key in tracked.items():
-        print("Ball available: " + str(key))
+    #for key in tracked.items():
+        #print("Ball available: " + str(key))
     for key, ball in tracked.items():
         if robot == robot_1_id:
             if str(key) == str(robot_1_target_id):
@@ -724,8 +724,8 @@ def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
 
     r_com, l_com = drive_commands(
         ball_x, ball_y, robot_x, robot_y, robot_yaw, speed)
-    r_com = 170*r_com #255*r_com
-    l_com = 170*l_com #255*l_com
+    r_com = 175*r_com #255*r_com
+    l_com = 175*l_com #255*l_com
     #print(l_com,r_com)
 
     # ohjauskomento sokettiin
