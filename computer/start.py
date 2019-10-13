@@ -54,6 +54,7 @@ class RobotState(IntEnum):
     PushBallToGoal = 3
     Pakitus = 4
     OpenServo = 5
+    CloseServo = 6
 
 robot_1_id = 16
 robot_2_id = 17
@@ -378,11 +379,30 @@ def ChaseTarget(robot, tracked, robot_pose):
     moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
     if isNearTarget(robot_pose, coordinatesForBall(target), 20):
-        updateState(robot, RobotState.PushBallToGoal)
+        updateState(robot, RobotState.CloseServo)
+
+def CloseServo(robot, tracked, robot_pose):
+    global SI1
+    global SI2
+    
+    # TASSA AVATAAN SERVOKOURA
+    if robot == robot_1_id:
+        SI1.servo_down()
+    if robot == robot_2_id:
+        SI2.servo_down()
+    updateState(robot, RobotState.PushBallToGoal)
 
 def OpenServo(robot, tracked, robot_pose):
+    global SI1
+    global SI2
+    
     # TASSA AVATAAN SERVOKOURA
+    if robot == robot_1_id:
+        SI1.servo_up()
+    if robot == robot_2_id:
+        SI2.servo_up()
     updateState(robot, RobotState.Idle)
+
 
 # Pusketaan pallo maaliin
 def PushBallToGoal(robot, tracked, robot_pose):
@@ -428,7 +448,7 @@ def Pakitus(robot, tracked, robot_pose):
         SI2.send_command(-150, -150)
 
     if time.time() > start_time + 1:
-        updateState(robot, RobotState.Idle)
+        updateState(robot, RobotState.OpenServo)
         return
 
 # Kaannytaan pallon suuntaan
@@ -461,6 +481,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         3: PushBallToGoal,
         4: Pakitus,
         5: OpenServo,
+        6: CloseServo,
     }
     robot_pose = (0.0, 0.0, 0.0)
     pose_found = False
@@ -626,16 +647,16 @@ def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
     global robot_2_id
     if robot == robot_1_id:
         robot_1_position_log.append(robot_pose)
-        if len(robot_1_position_log) > 150:
-            if distance.euclidean(robot_1_position_log[-150:][0], (robot_pose[0], robot_pose[1])) < (3 * centimeter):
+        if len(robot_1_position_log) > 50:
+            if distance.euclidean(robot_1_position_log[-50:][0], (robot_pose[0], robot_pose[1])) < (3 * centimeter):
                 updateState(robot, RobotState.Pakitus)
                 robot_1_pakitus_start_time = time.time()
                 return
     if robot == robot_2_id:
         robot_2_position_log.append(robot_pose)
-        if len(robot_2_position_log) > 150:
-            print(str(robot_2_position_log[-150:][0]))
-            if distance.euclidean((robot_2_position_log[-150:][0][0], robot_2_position_log[-150:][0][1]), (robot_pose[0], robot_pose[1])) < (3 * centimeter):
+        if len(robot_2_position_log) > 50:
+            print(str(robot_2_position_log[-50:][0]))
+            if distance.euclidean((robot_2_position_log[-50:][0][0], robot_2_position_log[-50:][0][1]), (robot_pose[0], robot_pose[1])) < (3 * centimeter):
                 updateState(robot, RobotState.Pakitus)
                 robot_2_pakitus_start_time = time.time()
                 return
