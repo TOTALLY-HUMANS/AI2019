@@ -51,6 +51,18 @@ def main():
       print("speed: "+str(speed))
       button_pressed = True
 
+    if keyboard.is_pressed('l'):
+      SI1.servo_forward()
+      time.sleep(0.5)
+      print("servo backward")
+
+      
+    if keyboard.is_pressed('o'):
+      SI1.servo_backward()
+      time.sleep(0.5)
+      print("servo forward")
+
+
     if button_pressed:
       time.sleep(0.5)
       SI1.send_step_command(r_com, l_com)
