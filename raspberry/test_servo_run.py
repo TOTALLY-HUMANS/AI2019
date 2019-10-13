@@ -7,8 +7,8 @@ class ServoController:
 
   def __init__(self):
 	GPIO.setmode(GPIO.BOARD)
-	GPIO.setup(12, GPIO.OUT)
-	self.pwm=GPIO.PWM(12, 50)
+	GPIO.setup(18, GPIO.OUT)
+	self.pwm=GPIO.PWM(18, 50)
 	self.pwm.start(0)
 	t = threading.Thread(target=self._run)
  	t.daemon = True

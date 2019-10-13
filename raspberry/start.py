@@ -18,7 +18,7 @@ def main():
         ID = 2
     ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
 #  USC = UltrasonicCapture()
-#  SC = ServoController()
+    SC = ServoController()
     if not ser.isOpen():
         return
         # print("cant open serial")
@@ -56,10 +56,10 @@ def main():
             data = 'R' + str(0) + 'L' + str(0) + ' '
             ser.write(data)
 
-#    elif data[0] == 'S':
-#      SC.MoveForward()
-#    elif data[0] == 'R':
-#      SC.MoveBackward()
+        elif data[0] == 'S':
+            SC.MoveForward()
+        elif data[0] == 'R':
+            SC.MoveBackward()
 
 
 if __name__ == '__main__':
