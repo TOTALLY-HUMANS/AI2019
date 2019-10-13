@@ -7,7 +7,7 @@ class ServoController:
   def __init__(self):
 	self.runstate = 0
 	self.state = 0
-	GPIO.setmode(GPIO.BCM)
+	GPIO.setmode(GPIO.BCM)x
 	GPIO.setup(18, GPIO.OUT)
 	self.pwm=GPIO.PWM(18, 50)
 	self.pwm.start(0)
@@ -16,12 +16,15 @@ class ServoController:
  	t.start()
 
   def MoveDown(self):
+	print("Move down command received")
 	self.runstate = 1
 
   def MoveUp(self):
+	print("Move up command received")
 	self.runstate = -1
 
   def _run(self):
+	print("running")
 	if self.runstate == -1:
 		self.runstate = 0
 		self.up()
