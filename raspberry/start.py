@@ -12,7 +12,10 @@ import os.path
 # mac = '34:F3:9A:CA:C8:3E'
 
 
+
 def main():
+    connected = False
+
     if os.path.isfile("./1"):
         ID = 1
     if os.path.isfile("./2"):
@@ -26,20 +29,27 @@ def main():
         # return
 #  s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('lpa-7510-ubu.local', 50001))
+    while not connected:
+        try:
+            s.connect(('servu.local', 50001))
+            connected = True
+            print("connected")
+        except socket.error:
+            time.sleep(2)
     # message = str(ID) + "DISTANCE:" + str(USC.read())
     message = "test"
     while 1:
         # print("while")
         s.sendall(message.encode())
         data = s.recv(512).decode()
+
 #    print(data)
 
         # Normaali ajokomento
         if data[0] == 'M':
             split_data = data.split('#')
            # print("r_com ", str(split_data[1]),
-                 # " l_com ", str(split_data[2]))
+            # " l_com ", str(split_data[2]))
             r_com = str(split_data[1])
             l_com = str(split_data[2])
             data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
