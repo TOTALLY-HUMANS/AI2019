@@ -25,7 +25,6 @@ class ServoController:
 
   def _run(self):
 	while True:
-		print("running")
 		if self.runstate == -1:
 			self.runstate = 0
 			self.up()
