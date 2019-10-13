@@ -1,11 +1,11 @@
 import RPi.GPIO as GPIO
 from time import sleep
 import threading
-runstate = 0
 
 class ServoController:
 
   def __init__(self):
+	self.runstate = 0
 	GPIO.setmode(GPIO.BOARD)
 	GPIO.setup(18, GPIO.OUT)
 	self.pwm=GPIO.PWM(18, 50)
@@ -14,30 +14,29 @@ class ServoController:
  	t.daemon = True
  	t.start()
 
-  def MoveForward(self):
-	global runstate
-	runstate = 1
+  def MoveDown(self):
+	self.runstate = 1
 
-  def MoveBackward(self):
-	global runstate
-	runstate = -1
+  def MoveUp(self):
+	self.runstate = -1
 
   def _run(self):
-	global runstate
-	if runstate == -1:
-		runstate = 0
-		servo(0)
-	if runstate == 1:
-		runstate = 0
-		servo(100)
+	if self.runstate == -1:
+		self.runstate = 0
+		self.up()
+	if self.runstate == 1:
+		self.runstate = 0
+		self.down()
 
-  def servo(self, angle):
-	duty = angle
-	GPIO.output(18, True)
-	self.pwm.ChangeDutyCycle(duty)
-	sleep(0.5)
-	GPIO.output(18, False)
-	self.pwm.ChangeDutyCycle(0)
+  def down(self):
+    p.ChangeDutyCycle(10)
+	time.sleep(1)
+	p.ChangeDutyCycle(0)
+
+  def up(self):
+	p.ChangeDutyCycle(4)
+	time.sleep(1)
+	p.ChangeDutyCycle(0)
 
   def __del__(self):
 	self.pwm.stop()
