@@ -1,3 +1,4 @@
+
 import serial
 
 import time
@@ -18,14 +19,14 @@ def main():
         ID = 2
     ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600)
 #  USC = UltrasonicCapture()
-#  SC = ServoController()
+    SC = ServoController()
     if not ser.isOpen():
         return
         # print("cant open serial")
         # return
 #  s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('192.168.1.131', 50001))
+    s.connect(('lpa-7510-ubu.local', 50001))
     # message = str(ID) + "DISTANCE:" + str(USC.read())
     message = "test"
     while 1:
@@ -37,8 +38,8 @@ def main():
         # Normaali ajokomento
         if data[0] == 'M':
             split_data = data.split('#')
-            print("r_com ", str(split_data[1]),
-                  " l_com ", str(split_data[2]))
+           # print("r_com ", str(split_data[1]),
+                 # " l_com ", str(split_data[2]))
             r_com = str(split_data[1])
             l_com = str(split_data[2])
             data = 'R' + str(r_com) + 'L' + str(l_com) + ' '
@@ -56,10 +57,10 @@ def main():
             data = 'R' + str(0) + 'L' + str(0) + ' '
             ser.write(data)
 
-#    elif data[0] == 'S':
-#      SC.MoveForward()
-#    elif data[0] == 'R':
-#      SC.MoveBackward()
+        elif data[0] == 'S':
+            SC.MoveForward()
+        elif data[0] == 'R':
+            SC.MoveBackward()
 
 
 if __name__ == '__main__':
