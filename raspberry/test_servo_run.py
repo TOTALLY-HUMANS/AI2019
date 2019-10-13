@@ -7,7 +7,7 @@ class ServoController:
   def __init__(self):
 	self.runstate = 0
 	self.state = 0
-	GPIO.setmode(GPIO.BCM)x
+	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(18, GPIO.OUT)
 	self.pwm=GPIO.PWM(18, 50)
 	self.pwm.start(0)
