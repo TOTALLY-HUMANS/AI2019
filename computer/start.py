@@ -12,7 +12,6 @@ from cv2 import aruco
 from math import acos
 from math import sqrt
 from math import pi
-#import vg
 
 from scipy.spatial import distance
 
@@ -53,6 +52,7 @@ class RobotState(IntEnum):
     FindTarget = 1
     ChaseTarget = 2
     PushBallToGoal = 3
+    Pakitus = 4
     OpenServo = 5
 
 robot_1_id = 16
@@ -67,6 +67,10 @@ robot_1_path = None
 robot_2_path = None
 robot_1_path_current_node = None
 robot_2_path_current_node = None
+robot_1_position_log = []
+robot_2_position_log = []
+robot_1_pakitus_start_time = 0
+robot_2_pakitus_start_time = 0
 SI1 = None
 SI2 = None
 UltrasonicSensor = None
@@ -87,8 +91,8 @@ def main():
     print("Loading configuration.")
     with open('config.json') as json_data:
         config = json.load(json_data)
-    SI1 = socketInterface()
-    #SI2 = socketInterface()
+    #SI1 = socketInterface(50002)
+    SI2 = socketInterface(50001)
 
   
     count = 0
@@ -134,7 +138,7 @@ def main():
                 #print(aruco_positions)
                 # Run robot AI
                 evaluateRobotState(robot_1_id, tracked_balls, aruco_positions)
-                #evaluateRobotState(robot_2_id, tracked_balls, positions)
+                evaluateRobotState(robot_2_id, tracked_balls, aruco_positions)
                 
                 '''robot_pose = (0.0, 0.0, 0.0)
                 for key,pos in aruco_positions.items():
@@ -407,6 +411,26 @@ def PushBallToGoal(robot, tracked, robot_pose):
 
     #    updateState(robot, RobotState.TurnTowardsTarget)
     
+def Pakitus(robot, tracked, robot_pose):
+    global robot_1_pakitus_start_time
+    global robot_1_id
+    global robot_2_pakitus_start_time
+    global robot_2_id
+    global SI1
+    global SI2
+
+    start_time = 0
+    if robot == robot_1_id:
+        start_time = robot_1_pakitus_start_time
+        SI1.send_command(-150, -150)
+    if robot == robot_2_id:
+        start_time = robot_2_pakitus_start_time
+        SI2.send_command(-150, -150)
+
+    if time.time() > start_time + 1:
+        updateState(robot, RobotState.Idle)
+        return
+
 # Kaannytaan pallon suuntaan
 #def TurnTowardsTarget(robot, tracked, robot_pose):
 #    global robot_1_target
@@ -435,6 +459,7 @@ def evaluateRobotState(robot, ball_positions, robot_positions):
         1: FindTarget,
         2: ChaseTarget,
         3: PushBallToGoal,
+        4: Pakitus,
         5: OpenServo,
     }
     robot_pose = (0.0, 0.0, 0.0)
@@ -592,6 +617,28 @@ def ramForward(robot):
 def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
     global SI1
     global SI2
+
+    global robot_1_position_log
+    global robot_2_position_log
+    global robot_1_pakitus_start_time
+    global robot_2_pakitus_start_time
+    global robot_1_id
+    global robot_2_id
+    if robot == robot_1_id:
+        robot_1_position_log.append(robot_pose)
+        if len(robot_1_position_log) > 150:
+            if distance.euclidean(robot_1_position_log[-150:][0], (robot_pose[0], robot_pose[1])) < (3 * centimeter):
+                updateState(robot, RobotState.Pakitus)
+                robot_1_pakitus_start_time = time.time()
+                return
+    if robot == robot_2_id:
+        robot_2_position_log.append(robot_pose)
+        if len(robot_2_position_log) > 150:
+            print(str(robot_2_position_log[-150:][0]))
+            if distance.euclidean((robot_2_position_log[-150:][0][0], robot_2_position_log[-150:][0][1]), (robot_pose[0], robot_pose[1])) < (3 * centimeter):
+                updateState(robot, RobotState.Pakitus)
+                robot_2_pakitus_start_time = time.time()
+                return
 
     '''target_x = target_pose[0]
     target_y = target_pose[1]

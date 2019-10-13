@@ -6,14 +6,15 @@ dist1 = 0
 dist2 = 0
 
 class socketInterface():
-  def __init__(self):
+  def __init__(self, prot):
     self.conn =None
+    self.port = prot
     self.setup_socket()
 
   def setup_socket(self):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    s.bind(('', 50001))
+    s.bind(('', self.port))
     s.listen(1)
     self.conn, addr = s.accept()
     t = threading.Thread(target=self._reader)
