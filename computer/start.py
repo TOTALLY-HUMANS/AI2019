@@ -375,11 +375,16 @@ def ChaseTarget(robot, tracked, robot_pose):
         updateState(robot, RobotState.FindTarget)
         return
 
+    if robot == robot_1_id:
+        SI1.servo_up()
+    if robot == robot_2_id:
+        SI2.servo_up()
+
     updateBallCoordinates(robot, tracked)
     moveTowardsTarget(robot, coordinatesForBall(target), robot_pose)
     # Jos ollaan riittavan lahella palloa, tahdataan siihen
     if isNearTarget(robot_pose, coordinatesForBall(target), 20):
-        updateState(robot, RobotState.CloseServo)
+        updateState(robot, RobotState.PushBallToGoal)
 
 def CloseServo(robot, tracked, robot_pose):
     global SI1
@@ -409,16 +414,21 @@ def PushBallToGoal(robot, tracked, robot_pose):
     global SI1
     global SI2
 
+    if robot == robot_1_id:
+        SI1.servo_down()
+    if robot == robot_2_id:
+        SI2.servo_down()
+
     print(str(robot) + ": Pushing ball to goal")
     id_number, target = getTarget(robot)
     if target.color == -1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
         if isNearTarget(robot_pose, opponent_goal_pose, 70):
-            updateState(robot, RobotState.OpenServo)
+            updateState(robot, RobotState.Idle)
     if target.color == 1:
         moveTowardsTarget(robot, own_goal_pose, robot_pose)
         if isNearTarget(robot_pose, own_goal_pose, 70):
-            updateState(robot, RobotState.OpenServo)
+            updateState(robot, RobotState.Idle)
 
     # Jos ollaan riittavan lahella, jyrataan pain
     #socket = None

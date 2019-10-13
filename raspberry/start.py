@@ -67,10 +67,8 @@ def main():
             data = 'R' + str(0) + 'L' + str(0) + ' '
             ser.write(data)
         elif data[0] == 'U':
-            print("Opening servo")
             SC.MoveUp()
         elif data[0] == 'D':
-            print("Closing servo")
             SC.MoveDown()
 
 

@@ -16,11 +16,9 @@ class ServoController:
  	t.start()
 
   def MoveDown(self):
-	print("Move down command received")
 	self.runstate = 1
 
   def MoveUp(self):
-	print("Move up command received")
 	self.runstate = -1
 
   def _run(self):
