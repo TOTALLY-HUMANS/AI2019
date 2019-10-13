@@ -75,8 +75,8 @@ robot_2_pakitus_start_time = 0
 SI1 = None
 SI2 = None
 UltrasonicSensor = None
-own_goal_pose = (0, 0)
-opponent_goal_pose = (972, 972)
+own_goal_pose = (972, 972)
+opponent_goal_pose = (0, 0)
 if sys.argv[0] == 'futurice':
     own_goal_pose = (972, 972)
     opponent_goal_pose = (0, 0)
@@ -92,8 +92,8 @@ def main():
     print("Loading configuration.")
     with open('config.json') as json_data:
         config = json.load(json_data)
-    #SI1 = socketInterface(50002)
-    SI2 = socketInterface(50001)
+    SI1 = socketInterface(50001)
+    SI2 = socketInterface(50002)
 
   
     count = 0
@@ -412,12 +412,12 @@ def PushBallToGoal(robot, tracked, robot_pose):
     print(str(robot) + ": Pushing ball to goal")
     id_number, target = getTarget(robot)
     if target.color == -1:
-        moveTowardsTarget(robot, own_goal_pose, robot_pose)
-        if isNearTarget(robot_pose, own_goal_pose, 70):
-            updateState(robot, RobotState.OpenServo)
-    if target.color == 1:
         moveTowardsTarget(robot, opponent_goal_pose, robot_pose)
         if isNearTarget(robot_pose, opponent_goal_pose, 70):
+            updateState(robot, RobotState.OpenServo)
+    if target.color == 1:
+        moveTowardsTarget(robot, own_goal_pose, robot_pose)
+        if isNearTarget(robot_pose, own_goal_pose, 70):
             updateState(robot, RobotState.OpenServo)
 
     # Jos ollaan riittavan lahella, jyrataan pain
@@ -647,16 +647,15 @@ def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
     global robot_2_id
     if robot == robot_1_id:
         robot_1_position_log.append(robot_pose)
-        if len(robot_1_position_log) > 50:
-            if distance.euclidean(robot_1_position_log[-50:][0], (robot_pose[0], robot_pose[1])) < (3 * centimeter):
+        if len(robot_1_position_log) > 150:
+            if distance.euclidean((robot_1_position_log[-150:][0][0], robot_1_position_log[-150:][0][1]), (robot_pose[0], robot_pose[1])) < (3 * centimeter):
                 updateState(robot, RobotState.Pakitus)
                 robot_1_pakitus_start_time = time.time()
                 return
     if robot == robot_2_id:
         robot_2_position_log.append(robot_pose)
-        if len(robot_2_position_log) > 50:
-            print(str(robot_2_position_log[-50:][0]))
-            if distance.euclidean((robot_2_position_log[-50:][0][0], robot_2_position_log[-50:][0][1]), (robot_pose[0], robot_pose[1])) < (3 * centimeter):
+        if len(robot_2_position_log) > 150:
+            if distance.euclidean((robot_2_position_log[-150:][0][0], robot_2_position_log[-150:][0][1]), (robot_pose[0], robot_pose[1])) < (3 * centimeter):
                 updateState(robot, RobotState.Pakitus)
                 robot_2_pakitus_start_time = time.time()
                 return
@@ -715,8 +714,8 @@ def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
 
     r_com, l_com = drive_commands(
         ball_x, ball_y, robot_x, robot_y, robot_yaw, speed)
-    r_com = 175*r_com #255*r_com
-    l_com = 175*l_com #255*l_com
+    r_com = 170*r_com #255*r_com
+    l_com = 170*l_com #255*l_com
     #print(l_com,r_com)
 
     # ohjauskomento sokettiin
@@ -728,7 +727,7 @@ def moveTowardsTarget(robot, target_pose, robot_pose, speed = 0.4):
             SI1.send_command(r_com, l_com)
     if robot == robot_2_id:
         if speed == 0:
-            S2.send_step_command(r_com,_l_com)
+            SI2.send_step_command(r_com,_l_com)
         else:
             SI2.send_command(r_com, l_com)
 

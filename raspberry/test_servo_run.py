@@ -6,7 +6,8 @@ class ServoController:
 
   def __init__(self):
 	self.runstate = 0
-	GPIO.setmode(GPIO.BOARD)
+	self.state = 0
+	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(18, GPIO.OUT)
 	self.pwm=GPIO.PWM(18, 50)
 	self.pwm.start(0)
@@ -29,14 +30,20 @@ class ServoController:
 		self.down()
 
   def down(self):
-    p.ChangeDutyCycle(10)
-	time.sleep(1)
-	p.ChangeDutyCycle(0)
+	if state is not 1:
+		print("SERVO GOING DOWN")
+		self.pwm.ChangeDutyCycle(10)
+		time.sleep(1)
+		self.pwm.ChangeDutyCycle(0)
+		state = 1
 
   def up(self):
-	p.ChangeDutyCycle(4)
-	time.sleep(1)
-	p.ChangeDutyCycle(0)
+	if state is not -1:
+	  print("SERVO GOING UP")
+	  self.pwm.ChangeDutyCycle(4)
+	  time.sleep(1)
+	  self.pwm.ChangeDutyCycle(0)
+	  state = -1
 
   def __del__(self):
 	self.pwm.stop()
