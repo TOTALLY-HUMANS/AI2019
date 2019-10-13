@@ -74,12 +74,13 @@ def main():
                     c,s = np.cos(theta), np.sin(theta)
                     t = np.array([x,y])
                     rot_mat = np.array((c, -s),(s, c))
+                    
                     for i in range(-30,30):
                         for j in range(-30,30):
                             trans_i = i*c +s*j
                             trans_j = -i*s +c*j
                             mask[int(trans_i+y),int(trans_j+x)] = 255
- 
+                    
                 # dilate balls and robot, resize mask
                 
                 center_x = 500
@@ -88,17 +89,18 @@ def main():
                 c,s = np.cos(theta), np.sin(theta)
                 t = np.array([center_x,center_y])
                 rot_mat = np.array((c, -s),(s, c))
+                """
                 for i2 in range(-150,150):
                     for j2 in range(-150,150):
                         trans_i = i2*c +s*j2
                         trans_j = -i2*s +c*j2
                         mask[int(trans_i+center_y),int(trans_j+center_x)] = 150
-
+                """
                 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))  
                 mask = cv2.dilate(mask, kernel, iterations=10)
                 mask = cv2.resize(mask, (int(972*0.2), int(972*0.2)))
                 #mask = downscale_image(img, 20)
-                print(mask.shape)
+                #print(mask.shape)
 
                 # find path
                 start_time = time.time()
@@ -116,7 +118,7 @@ def main():
                         scaled_path.append(tuple_item)
                         cv2.circle(img, tuple_item, 2, (0,0,225))
 
-                print(scaled_path)
+                #print(scaled_path)
                 cv2.imshow('orig', img)
                 #cv2.imshow('mask_test', mask)
                 key = cv2.waitKey(1)

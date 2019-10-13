@@ -26,17 +26,17 @@ class ServoController:
 	global runstate
 	if runstate == -1:
 		runstate = 0
-		servo(-1)
+		servo(0)
 	if runstate == 1:
 		runstate = 0
-		servo(1)
+		servo(100)
 
   def servo(self, angle):
 	duty = angle
-	GPIO.output(12, True)
+	GPIO.output(18, True)
 	self.pwm.ChangeDutyCycle(duty)
 	sleep(0.5)
-	GPIO.output(12, False)
+	GPIO.output(18, False)
 	self.pwm.ChangeDutyCycle(0)
 
   def __del__(self):
