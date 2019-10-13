@@ -33,20 +33,20 @@ class ServoController:
 			self.down()
 
   def down(self):
-	if state is not 1:
+	if self.state is not 1:
 		print("SERVO GOING DOWN")
 		self.pwm.ChangeDutyCycle(10)
 		time.sleep(1)
 		self.pwm.ChangeDutyCycle(0)
-		state = 1
+		self.state = 1
 
   def up(self):
-	if state is not -1:
+	if self.state is not -1:
 	  print("SERVO GOING UP")
 	  self.pwm.ChangeDutyCycle(4)
 	  time.sleep(1)
 	  self.pwm.ChangeDutyCycle(0)
-	  state = -1
+	  self.state = -1
 
   def __del__(self):
 	self.pwm.stop()
